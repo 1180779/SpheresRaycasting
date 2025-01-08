@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{b55a3257-484c-493d-bd62-dd5fa5f7f715}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{782cd74f-5bf9-4814-9c49-c68132837fe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\global">
+      <UniqueIdentifier>{7856eace-5111-4edc-a261-476c4142a744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\camera">
+      <UniqueIdentifier>{5520be00-c596-44bb-9e89-a3fe232fa52d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\shapes">
+      <UniqueIdentifier>{9cdf3145-2ff1-443a-ab72-dca97b3dfeb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\rendering">
+      <UniqueIdentifier>{e8a3d129-833e-4b36-a1f4-aeca2bd0e872}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="main.cu">
+      <Filter>source</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imGui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imgui_impl_glfw.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imgui_impl_opengl3.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imgui_impl_opengl3_loader.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imGui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.hpp">
+      <Filter>source\global</Filter>
+    </ClInclude>
+    <ClInclude Include="shadersC.hpp">
+      <Filter>source\global</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.hpp">
+      <Filter>source\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="objectList.hpp">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="objectShape.hpp">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="rectangleShape.hpp">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="triangleShape.hpp">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="cubeShape.hpp">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering.hpp">
+      <Filter>source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="imGuiUi.hpp">
+      <Filter>source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="spheres.cuh">
+      <Filter>source\shapes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="imGui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_impl_glfw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_impl_opengl3.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imGui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>source\global</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>source\global</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>source\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="objectList.cpp">
+      <Filter>source\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="objectShape.cpp">
+      <Filter>source\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="rectangleShape.cpp">
+      <Filter>source\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="triangleShape.cpp">
+      <Filter>source\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="cubeShape.cpp">
+      <Filter>source\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering.cpp">
+      <Filter>source\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="imGuiUi.cpp">
+      <Filter>source\rendering</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
