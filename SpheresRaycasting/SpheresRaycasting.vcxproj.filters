@@ -83,8 +83,20 @@
     <ClInclude Include="imGuiUi.hpp">
       <Filter>source\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="spheres.cuh">
-      <Filter>source\shapes</Filter>
+    <ClInclude Include="buffer.cuh">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="castRays.cuh">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="spheres.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="general.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="spheresData.hpp">
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +150,12 @@
     </ClCompile>
     <ClCompile Include="imGuiUi.cpp">
       <Filter>source\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="spheres.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="spheresData.cpp">
+      <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

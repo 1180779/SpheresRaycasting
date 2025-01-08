@@ -1,7 +1,9 @@
 ﻿
 /* CUDA */
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
+#include "castRays.cuh"
 
 /* NOT CUDA */
 #include "rendering.hpp"
@@ -19,6 +21,8 @@
 #include "rectangleShape.hpp"
 #include "cubeShape.hpp"
 
+
+
 #define STB_IMAGE_IMPLEMENTATION
 
 int main(int, char**)
@@ -30,38 +34,12 @@ int main(int, char**)
     render.initGL();
     glEnable(GL_DEPTH_TEST);
 
-    objectList list;
-    glm::vec3 cubePositions[10] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    float angle = 50.f;
-    for (int i = 0; i < 10; ++i) {
-        angle += 50.f;
-        objectShape* obj = new cube();
-        obj->translate(cubePositions[i]);
-        list.addObject(obj);
-    }
 
     camera cam(render);
     cam.setCurrent();
-    camera::disableCursor(render);
-    camera::setCallbacks(render);
+    //camera::disableCursor(render);
+    //camera::setCallbacks(render);
 
-    texture t1("textures/woodencontainer.jpg"), t2("textures/awesomeface.png", GL_RGBA);
-    shader sh(vertexSS7, fragmentSS7);
-    sh.use();
-    sh.set1i("texture1", 0);
-    sh.set1i("texture2", 1);
 
     // Main loop
     while (!glfwWindowShouldClose(render.window))
@@ -94,12 +72,7 @@ int main(int, char**)
         render.clearColor();
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        t1.use();
-        t2.use(1);
-        sh.use();
-        cam.use(sh);
 
-        list.render(sh);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
