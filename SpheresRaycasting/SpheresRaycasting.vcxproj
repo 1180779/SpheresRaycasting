@@ -61,6 +61,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <AdditionalOptions>-lineinfo -G %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -80,6 +81,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <AdditionalOptions>-lineinfo -G %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -101,12 +103,13 @@
     <ClInclude Include="imGui\imstb_rectpack.h" />
     <ClInclude Include="imGui\imstb_textedit.h" />
     <ClInclude Include="imGui\imstb_truetype.h" />
+    <ClInclude Include="lightData.hpp" />
     <ClInclude Include="objectList.hpp" />
     <ClInclude Include="objectShape.hpp" />
     <ClInclude Include="rectangleShape.hpp" />
     <ClInclude Include="rendering.hpp" />
     <ClInclude Include="shader.hpp" />
-    <ClInclude Include="shadersC.hpp" />
+    <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="spheres.hpp" />
     <ClInclude Include="spheresData.hpp" />
     <ClInclude Include="triangleShape.hpp" />
@@ -123,11 +126,13 @@
     <ClCompile Include="imGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imGui\imgui_tables.cpp" />
     <ClCompile Include="imGui\imgui_widgets.cpp" />
+    <ClCompile Include="lightData.cpp" />
     <ClCompile Include="objectList.cpp" />
     <ClCompile Include="objectShape.cpp" />
     <ClCompile Include="rectangleShape.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="spheres.cpp" />
     <ClCompile Include="spheresData.cpp" />
     <ClCompile Include="triangleShape.cpp" />

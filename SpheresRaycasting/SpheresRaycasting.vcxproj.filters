@@ -56,9 +56,6 @@
     <ClInclude Include="shader.hpp">
       <Filter>source\global</Filter>
     </ClInclude>
-    <ClInclude Include="shadersC.hpp">
-      <Filter>source\global</Filter>
-    </ClInclude>
     <ClInclude Include="camera.hpp">
       <Filter>source\camera</Filter>
     </ClInclude>
@@ -96,6 +93,12 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="spheresData.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="lightData.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderSource.hpp">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,6 +158,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="spheresData.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="lightData.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderSource.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
