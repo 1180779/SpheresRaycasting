@@ -104,10 +104,12 @@
     <ClInclude Include="imGui\imstb_textedit.h" />
     <ClInclude Include="imGui\imstb_truetype.h" />
     <ClInclude Include="lightData.hpp" />
+    <ClInclude Include="mat4.cuh" />
     <ClInclude Include="objectList.hpp" />
     <ClInclude Include="objectShape.hpp" />
     <ClInclude Include="rectangleShape.hpp" />
     <ClInclude Include="rendering.hpp" />
+    <ClInclude Include="transformScene.cuh" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="spheres.hpp" />

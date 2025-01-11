@@ -2,10 +2,10 @@
 #ifndef U1180779_CAST_RAYS_H
 #define U1180779_CAST_RAYS_H
 
-#include <glad/glad.h>
-#include <cuda_gl_interop.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <glad/glad.h>
+#include <cuda_gl_interop.h>
 
 #include "spheresData.hpp"
 #include "lightData.hpp"

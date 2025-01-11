@@ -19,6 +19,9 @@
     <Filter Include="source\rendering">
       <UniqueIdentifier>{e8a3d129-833e-4b36-a1f4-aeca2bd0e872}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\kernels">
+      <UniqueIdentifier>{5250241a-de60-4710-b88b-fcc4df2c363c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu">
@@ -83,9 +86,6 @@
     <ClInclude Include="buffer.cuh">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="castRays.cuh">
-      <Filter>source</Filter>
-    </ClInclude>
     <ClInclude Include="spheres.hpp">
       <Filter>source</Filter>
     </ClInclude>
@@ -100,6 +100,15 @@
     </ClInclude>
     <ClInclude Include="shaderSource.hpp">
       <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="castRays.cuh">
+      <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="transformScene.cuh">
+      <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="mat4.cuh">
+      <Filter>source\kernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
