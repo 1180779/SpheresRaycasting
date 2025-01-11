@@ -28,6 +28,8 @@ struct spheresData
     void dFree();
 
     void copyHostToDevice(const spheresData& source);
+    void copyDeviceToHost(const spheresData& source);
+
 };
 
 struct sphereData {

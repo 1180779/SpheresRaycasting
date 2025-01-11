@@ -8,34 +8,68 @@
 #include "spheres.hpp"
 #include "general.hpp"
 
+#include "callbacks.cuh"
+
 /* NOT CUDA */
 #include "rendering.hpp"
 #include "imGuiUi.hpp"
 
 #include "shader.hpp"
-#include "camera.hpp"
+
+#include "mat4.cuh"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+
+void matTests() {
+    glm::mat4 tGLM = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    mat4 t;
+    t = tGLM;
+
+    glm::vec4 vGLM(1.f, 1.f, 1.f, 1.f);
+    vec4 v(1.f, 1.f, 1.f, 1.f);
+
+    v = t * v;
+    vGLM = tGLM * vGLM;
+
+    std::cout << "x = " << v(0) << ", y = " << v(1) << ", z = " << v(2) << ", wGLM = " << v(3) << std::endl;
+    std::cout << "xGLM = " << vGLM[0] << ", yGLM = " << vGLM[1] << ", zGLM = " << vGLM[2] << ", wGLM = " << vGLM[3] << std::endl;
+}
 
 int main(int, char**)
 {
+    //matTests();
+    //return;
+
     rendering render = rendering();
     imGuiUi ui = imGuiUi(render);
     ui.styleLight();
     ui.styleRounded();
     render.initGL();
-    glEnable(GL_DEPTH_TEST);
 
-    
     xcudaSetDevice(0);
 
-
+    disableCursor(render);
 
     buffer b = buffer();
 
+
     spheres data;
-    data.generate(10, 50, 50, 0, 1920, 0, 1080, 50, 60);
+    data.generate(200, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
     castRaysData raysData;
     raysData.sData = data.md_spheres;
    
+    transformData tData;
+    tData.sData = data.md_spheres;
+
+    spheresDataForCallback = &tData;
+
+    castRaysSortTempData tempData;
+    tempData.malloc(data);
+
+
+    dim3 blocksForSpheres = dim3(data.dCount() / BLOCK_SIZE + 1);
+    dim3 threadsForSpheres = dim3(BLOCK_SIZE);
 
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
@@ -71,6 +105,19 @@ int main(int, char**)
         render.clearColor();
         glClear(GL_DEPTH_BUFFER_BIT);
 
+
+        sortByZ(tempData);
+        setKeys << <blocksForSpheres, threadsForSpheres >> > (tempData);
+        xcudaDeviceSynchronize();
+        xcudaGetLastError();
+        copyToTempKernel<<<blocksForSpheres, threadsForSpheres>>>(tempData);
+        xcudaDeviceSynchronize();
+        xcudaGetLastError();
+        copyFromTempKernel << <blocksForSpheres, threadsForSpheres >> > (tempData);
+        xcudaDeviceSynchronize();
+        xcudaGetLastError();
+
+
         b.mapCudaResource();
 
 
@@ -78,8 +125,15 @@ int main(int, char**)
         raysData.height = b.m_maxHeight;
         raysData.surfaceObject = b.m_surfaceObject;
         castRaysKernel << <blocks, threads >> > (raysData);
-        xcudaGetLastError();
         xcudaDeviceSynchronize();
+        xcudaGetLastError();
+
+        //data.mh_spheres.copyDeviceToHost(raysData.sData);
+        //std::cout << "\n\n";
+        //std::cout << "DATA" << std::endl;
+        //for (int i = 0; i < data.mh_spheres.count; ++i) {
+        //    std::cout << "x = " << data.mh_spheres.x[i] << ", y = " << data.mh_spheres.y[i] << ", z = " << data.mh_spheres.z[i] << ", r = " << data.mh_spheres.r[i] << std::endl;
+        //}
 
         b.unmapCudaResource();
         b.use();
@@ -87,6 +141,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
+    tempData.free();
     data.free();
     return 0;
 }

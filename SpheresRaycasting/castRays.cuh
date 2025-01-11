@@ -7,8 +7,14 @@
 #include <glad/glad.h>
 #include <cuda_gl_interop.h>
 
+#include <thrust/sort.h>
+#include <thrust/device_ptr.h>
+
+#include "general.hpp"
+
 #include "spheresData.hpp"
 #include "lightData.hpp"
+#include "spheres.hpp"
 
 struct castRaysData
 {
@@ -20,6 +26,73 @@ struct castRaysData
     spheresData sData;
     lightData lData;
 };
+
+struct castRaysSortTempData
+{
+    int* keys;
+    castRaysData data;
+    castRaysData temp;
+
+    void malloc(spheres& data);
+    void free();
+};
+
+void castRaysSortTempData::malloc(spheres& data)
+{
+    this->data.sData = data.md_spheres;
+    xcudaMalloc(&keys, sizeof(int) * data.hCount());
+    temp.sData.dMalloc(data.hCount());
+}
+
+void castRaysSortTempData::free()
+{
+    xcudaFree(keys);
+    temp.sData.dFree();
+}
+
+__global__ void setKeys(castRaysSortTempData data)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= data.data.sData.count)
+        return;
+    data.keys[i] = i;
+}
+
+__host__ void sortByZ(castRaysSortTempData data)
+{
+    thrust::sort_by_key(thrust::device_ptr<int>(data.keys),
+        thrust::device_ptr<int>(data.keys + data.data.sData.count),
+        thrust::device_ptr<float>(data.data.sData.z));
+}
+
+__global__ void copyToTempKernel(castRaysSortTempData data)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= data.data.sData.count)
+        return;
+    int index = data.keys[i];
+
+    data.temp.sData.x[index] = data.data.sData.x[i];
+    data.temp.sData.y[index] = data.data.sData.y[i];
+    data.temp.sData.z[index] = data.data.sData.z[i];
+    data.temp.sData.w[index] = data.data.sData.w[i];
+    data.temp.sData.r[index] = data.data.sData.r[i];
+    data.temp.sData.color[index] = data.data.sData.color[i];
+}
+
+__global__ void copyFromTempKernel(castRaysSortTempData data)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= data.data.sData.count)
+        return;
+
+    data.data.sData.x[i] = data.temp.sData.x[i];
+    data.data.sData.y[i] = data.temp.sData.y[i];
+    data.data.sData.z[i] = data.temp.sData.z[i];
+    data.data.sData.w[i] = data.temp.sData.w[i];
+    data.data.sData.r[i] = data.temp.sData.r[i];
+    data.data.sData.color[i] = data.temp.sData.color[i];
+}
 
 __global__ void castRaysKernel(castRaysData data)
 {
@@ -43,8 +116,9 @@ __global__ void castRaysKernel(castRaysData data)
     closest.r = 1.f;
 
     for (int i = 0; i < data.sData.count; ++i) {
+        __syncthreads();
         // check z (if closer by z coordinate)
-        if (!(data.sData.z[i] - o.z < closest.z - o.z))
+        if (!(data.sData.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
             continue;
 
         //check x and y
@@ -112,3 +186,5 @@ __global__ void castRaysKernel(castRaysData data)
 }
 
 #endif
+
+

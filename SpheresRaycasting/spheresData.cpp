@@ -56,3 +56,15 @@ void spheresData::copyHostToDevice(const spheresData& source)
     xcudaMemcpy(r, source.r, sizeof(float) * source.count, cudaMemcpyHostToDevice);
     xcudaMemcpy(color, source.color, sizeof(glm::ivec3) * source.count, cudaMemcpyHostToDevice);
 }
+
+void spheresData::copyDeviceToHost(const spheresData& source)
+{
+    if (source.count > count)
+        throw std::invalid_argument("not enough memory");
+    xcudaMemcpy(x, source.x, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
+    xcudaMemcpy(y, source.y, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
+    xcudaMemcpy(z, source.z, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
+    xcudaMemcpy(w, source.w, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
+    xcudaMemcpy(r, source.r, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
+    xcudaMemcpy(color, source.color, sizeof(glm::ivec3) * source.count, cudaMemcpyDeviceToHost);
+}
