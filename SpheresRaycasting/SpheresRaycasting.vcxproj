@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.cuh" />
+    <ClInclude Include="callbacks.cuh" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
     <ClInclude Include="cubeShape.hpp" />

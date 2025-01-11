@@ -110,6 +110,9 @@
     <ClInclude Include="mat4.cuh">
       <Filter>source\kernels</Filter>
     </ClInclude>
+    <ClInclude Include="callbacks.cuh">
+      <Filter>source\kernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">

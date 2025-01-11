@@ -57,6 +57,15 @@ struct mat4
         }
         return result;
     }
+
+    __host__ mat4 operator=(const glm::mat4& mat) {
+        for (int i = 0; i < 4; ++i) {
+            for(int j = 0; j < 4; ++j) {
+                (*this)(i, j) = mat[i][j];
+            }
+        }
+        
+    }
 };
 
 #endif
