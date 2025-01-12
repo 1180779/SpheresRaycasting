@@ -92,7 +92,6 @@
     <ClInclude Include="callbacks.cuh" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
-    <ClInclude Include="cubeShape.hpp" />
     <ClInclude Include="general.hpp" />
     <ClInclude Include="imGuiUi.hpp" />
     <ClInclude Include="imGui\imconfig.h" />
@@ -106,20 +105,15 @@
     <ClInclude Include="imGui\imstb_truetype.h" />
     <ClInclude Include="lightData.hpp" />
     <ClInclude Include="mat4.cuh" />
-    <ClInclude Include="objectList.hpp" />
-    <ClInclude Include="objectShape.hpp" />
-    <ClInclude Include="rectangleShape.hpp" />
     <ClInclude Include="rendering.hpp" />
     <ClInclude Include="transformScene.cuh" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="spheres.hpp" />
     <ClInclude Include="spheresData.hpp" />
-    <ClInclude Include="triangleShape.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
-    <ClCompile Include="cubeShape.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="imGuiUi.cpp" />
     <ClCompile Include="imGui\imgui.cpp" />
@@ -130,15 +124,11 @@
     <ClCompile Include="imGui\imgui_tables.cpp" />
     <ClCompile Include="imGui\imgui_widgets.cpp" />
     <ClCompile Include="lightData.cpp" />
-    <ClCompile Include="objectList.cpp" />
-    <ClCompile Include="objectShape.cpp" />
-    <ClCompile Include="rectangleShape.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="spheres.cpp" />
     <ClCompile Include="spheresData.cpp" />
-    <ClCompile Include="triangleShape.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

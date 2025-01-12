@@ -13,14 +13,14 @@
     <Filter Include="source\camera">
       <UniqueIdentifier>{5520be00-c596-44bb-9e89-a3fe232fa52d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\shapes">
-      <UniqueIdentifier>{9cdf3145-2ff1-443a-ab72-dca97b3dfeb5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source\rendering">
       <UniqueIdentifier>{e8a3d129-833e-4b36-a1f4-aeca2bd0e872}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\kernels">
       <UniqueIdentifier>{5250241a-de60-4710-b88b-fcc4df2c363c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\dataStructures">
+      <UniqueIdentifier>{0f9303db-cdd4-41ab-a008-51ec2e034da6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -62,21 +62,6 @@
     <ClInclude Include="camera.hpp">
       <Filter>source\camera</Filter>
     </ClInclude>
-    <ClInclude Include="objectList.hpp">
-      <Filter>source\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="objectShape.hpp">
-      <Filter>source\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="rectangleShape.hpp">
-      <Filter>source\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="triangleShape.hpp">
-      <Filter>source\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="cubeShape.hpp">
-      <Filter>source\shapes</Filter>
-    </ClInclude>
     <ClInclude Include="rendering.hpp">
       <Filter>source\rendering</Filter>
     </ClInclude>
@@ -84,21 +69,6 @@
       <Filter>source\rendering</Filter>
     </ClInclude>
     <ClInclude Include="buffer.cuh">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="spheres.hpp">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="general.hpp">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="spheresData.hpp">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="lightData.hpp">
-      <Filter>source</Filter>
-    </ClInclude>
-    <ClInclude Include="shaderSource.hpp">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="castRays.cuh">
@@ -112,6 +82,21 @@
     </ClInclude>
     <ClInclude Include="callbacks.cuh">
       <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderSource.hpp">
+      <Filter>source\global</Filter>
+    </ClInclude>
+    <ClInclude Include="general.hpp">
+      <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="spheresData.hpp">
+      <Filter>source\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="spheres.hpp">
+      <Filter>source\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="lightData.hpp">
+      <Filter>source\dataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -145,38 +130,23 @@
     <ClCompile Include="camera.cpp">
       <Filter>source\camera</Filter>
     </ClCompile>
-    <ClCompile Include="objectList.cpp">
-      <Filter>source\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="objectShape.cpp">
-      <Filter>source\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="rectangleShape.cpp">
-      <Filter>source\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="triangleShape.cpp">
-      <Filter>source\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="cubeShape.cpp">
-      <Filter>source\shapes</Filter>
-    </ClCompile>
     <ClCompile Include="rendering.cpp">
       <Filter>source\rendering</Filter>
     </ClCompile>
     <ClCompile Include="imGuiUi.cpp">
       <Filter>source\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="spheres.cpp">
-      <Filter>source</Filter>
+    <ClCompile Include="shaderSource.cpp">
+      <Filter>source\global</Filter>
     </ClCompile>
     <ClCompile Include="spheresData.cpp">
-      <Filter>source</Filter>
+      <Filter>source\dataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="spheres.cpp">
+      <Filter>source\dataStructures</Filter>
     </ClCompile>
     <ClCompile Include="lightData.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="shaderSource.cpp">
-      <Filter>source</Filter>
+      <Filter>source\dataStructures</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
