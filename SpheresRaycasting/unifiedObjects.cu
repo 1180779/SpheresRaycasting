@@ -1,5 +1,5 @@
 
-#include "unifiedObjects.hpp"
+#include "unifiedObjects.cuh"
 #include <stdexcept>
 
 void unifiedObjects::hMalloc(unsigned int c)

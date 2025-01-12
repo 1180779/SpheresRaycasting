@@ -61,7 +61,8 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>-lineinfo -G %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lineinfo -G -rdc=true %(AdditionalOptions)</AdditionalOptions>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,10 +82,12 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>-lineinfo -G %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lineinfo -G -rdc=true %(AdditionalOptions)</AdditionalOptions>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="lbvh.cu" />
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -111,7 +114,7 @@
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="dataObject.hpp" />
-    <ClInclude Include="unifiedObjects.hpp" />
+    <ClInclude Include="unifiedObjects.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
@@ -128,7 +131,10 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="dataObject.cpp" />
-    <ClCompile Include="unifiedObjects.cpp" />
+    <CudaCompile Include="sortObject.cu" />
+    <CudaCompile Include="unifiedObjects.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

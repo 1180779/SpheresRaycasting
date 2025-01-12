@@ -5,7 +5,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include "unifiedObjects.hpp"
+#include "unifiedObjects.cuh"
 #include "mat4.cuh"
 
 

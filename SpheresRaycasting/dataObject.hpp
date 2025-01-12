@@ -2,7 +2,7 @@
 #ifndef U1180779_DATA_OBJECT_H
 #define U1180779_DATA_OBJECT_H
 
-#include "unifiedObjects.hpp"
+#include "unifiedObjects.cuh"
 #include <cuda_runtime.h>
 
 /* holds both device and host copies of the scene objects data */

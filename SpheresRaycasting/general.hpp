@@ -16,7 +16,7 @@
             { \
                 fprintf(stderr, "error: %s\n",  cudaGetErrorString(status)); \
                 fprintf(stderr, "file: %s, line: %d\n", __FILE__, __LINE__); \
-                abort(); \
+                throw "cuda error"; \
             } \
         } while(0)
 

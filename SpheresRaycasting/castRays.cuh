@@ -12,7 +12,7 @@
 #include <thrust/device_ptr.h>
 
 #include "general.hpp"
-#include "unifiedObjects.hpp"
+#include "unifiedObjects.cuh"
 
 struct castRaysData
 {

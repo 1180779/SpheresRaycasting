@@ -27,6 +27,9 @@
     <CudaCompile Include="main.cu">
       <Filter>source</Filter>
     </CudaCompile>
+    <CudaCompile Include="lbvh.cu">
+      <Filter>source\dataStructures</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imGui\imstb_truetype.h">
@@ -95,11 +98,11 @@
     <ClInclude Include="unifiedObjects.hpp">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="lbvh.cuh">
-      <Filter>source\dataStructures</Filter>
-    </ClInclude>
     <ClInclude Include="sortObject.cuh">
       <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvh.cuh">
+      <Filter>source\dataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
