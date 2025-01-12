@@ -7,14 +7,12 @@
 #include <glad/glad.h>
 #include <cuda_gl_interop.h>
 
+#include <thrust/sequence.h>
 #include <thrust/sort.h>
 #include <thrust/device_ptr.h>
 
 #include "general.hpp"
-
-#include "spheresData.hpp"
-#include "lightData.hpp"
-#include "spheres.hpp"
+#include "unifiedObjects.hpp"
 
 struct castRaysData
 {
@@ -23,76 +21,8 @@ struct castRaysData
     int height = 0;
     cudaSurfaceObject_t surfaceObject;
 
-    spheresData sData;
-    lightData lData;
+    unifiedObjects data;
 };
-
-struct castRaysSortTempData
-{
-    int* keys;
-    castRaysData data;
-    castRaysData temp;
-
-    void malloc(spheres& data);
-    void free();
-};
-
-void castRaysSortTempData::malloc(spheres& data)
-{
-    this->data.sData = data.md_spheres;
-    xcudaMalloc(&keys, sizeof(int) * data.hCount());
-    temp.sData.dMalloc(data.hCount());
-}
-
-void castRaysSortTempData::free()
-{
-    xcudaFree(keys);
-    temp.sData.dFree();
-}
-
-__global__ void setKeys(castRaysSortTempData data)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= data.data.sData.count)
-        return;
-    data.keys[i] = i;
-}
-
-__host__ void sortByZ(castRaysSortTempData data)
-{
-    thrust::sort_by_key(thrust::device_ptr<int>(data.keys),
-        thrust::device_ptr<int>(data.keys + data.data.sData.count),
-        thrust::device_ptr<float>(data.data.sData.z));
-}
-
-__global__ void copyToTempKernel(castRaysSortTempData data)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= data.data.sData.count)
-        return;
-    int index = data.keys[i];
-
-    data.temp.sData.x[index] = data.data.sData.x[i];
-    data.temp.sData.y[index] = data.data.sData.y[i];
-    data.temp.sData.z[index] = data.data.sData.z[i];
-    data.temp.sData.w[index] = data.data.sData.w[i];
-    data.temp.sData.r[index] = data.data.sData.r[i];
-    data.temp.sData.color[index] = data.data.sData.color[i];
-}
-
-__global__ void copyFromTempKernel(castRaysSortTempData data)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= data.data.sData.count)
-        return;
-
-    data.data.sData.x[i] = data.temp.sData.x[i];
-    data.data.sData.y[i] = data.temp.sData.y[i];
-    data.data.sData.z[i] = data.temp.sData.z[i];
-    data.data.sData.w[i] = data.temp.sData.w[i];
-    data.data.sData.r[i] = data.temp.sData.r[i];
-    data.data.sData.color[i] = data.temp.sData.color[i];
-}
 
 __global__ void castRaysKernel(castRaysData data)
 {
@@ -109,28 +39,24 @@ __global__ void castRaysKernel(castRaysData data)
     o.z = data.z;
 
     // find closes sphere (or light) by z coordinate
-    sphereData closest;
+    unifiedObject closest;
     closest.x = FLT_MAX / 2.f;
     closest.y = FLT_MAX / 2.f;
     closest.z = FLT_MAX / 2.f;
     closest.r = 1.f;
 
-    for (int i = 0; i < data.sData.count; ++i) {
+    for (int i = 0; i < data.data.count; ++i) {
         __syncthreads();
         // check z (if closer by z coordinate)
-        if (!(data.sData.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
+        if (!(data.data.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
             continue;
 
         //check x and y
-        float dist2 = (data.sData.x[i] - o.x) * (data.sData.x[i] - o.x) + (data.sData.y[i] - o.y) * (data.sData.y[i] - o.y);
-        if (dist2 > data.sData.r[i] * data.sData.r[i])
+        float dist2 = (data.data.x[i] - o.x) * (data.data.x[i] - o.x) + (data.data.y[i] - o.y) * (data.data.y[i] - o.y);
+        if (dist2 > data.data.r[i] * data.data.r[i])
             continue;
 
-        closest.x = data.sData.x[i];
-        closest.y = data.sData.y[i];
-        closest.z = data.sData.z[i];
-        closest.r = data.sData.r[i];
-        closest.color = data.sData.color[i];
+        closest = data.data(i);
     }
 
     // if found no sphere return

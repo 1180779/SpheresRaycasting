@@ -5,8 +5,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include "spheresData.hpp"
-#include "lightData.hpp"
+#include "unifiedObjects.hpp"
 #include "mat4.cuh"
 
 
@@ -14,22 +13,21 @@ struct transformData
 {
     mat4 t;
 
-    spheresData sData;
-    lightData lData;
+    unifiedObjects data;
 };
 
 __global__ void transformSceneKernel(transformData data)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x; // sphere to transform
+    int i = blockIdx.x * blockDim.x + threadIdx.x; // object to transform
 
-    if (i >= data.sData.count)
+    if (i >= data.data.count)
         return;
-    vec4 r(data.sData.x[i], data.sData.y[i], data.sData.z[i], data.sData.w[i]);
+    vec4 r(data.data.x[i], data.data.y[i], data.data.z[i], data.data.w[i]);
     r = data.t * r;
-    data.sData.x[i] = r(0);
-    data.sData.y[i] = r(1);
-    data.sData.z[i] = r(2);
-    data.sData.w[i] = r(3);
+    data.data.x[i] = r(0);
+    data.data.y[i] = r(1);
+    data.data.z[i] = r(2);
+    data.data.w[i] = r(3);
 }
 
 

@@ -5,7 +5,6 @@
 
 #include "castRays.cuh"
 #include "buffer.cuh"
-#include "spheres.hpp"
 #include "general.hpp"
 
 #include "callbacks.cuh"
@@ -18,8 +17,7 @@
 
 #include "mat4.cuh"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/glm.hpp>
+#include "dataObject.hpp"
 
 void matTests() {
     glm::mat4 tGLM = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -54,19 +52,16 @@ int main(int, char**)
     buffer b = buffer();
 
 
-    spheres data;
+    dataObject data;
     data.generate(200, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
+
     castRaysData raysData;
-    raysData.sData = data.md_spheres;
+    raysData.data = data.md_unified;
    
     transformData tData;
-    tData.sData = data.md_spheres;
+    tData.data = data.md_unified;
 
     spheresDataForCallback = &tData;
-
-    castRaysSortTempData tempData;
-    tempData.malloc(data);
-
 
     dim3 blocksForSpheres = dim3(data.dCount() / BLOCK_SIZE + 1);
     dim3 threadsForSpheres = dim3(BLOCK_SIZE);
@@ -106,18 +101,6 @@ int main(int, char**)
         glClear(GL_DEPTH_BUFFER_BIT);
 
 
-        sortByZ(tempData);
-        setKeys << <blocksForSpheres, threadsForSpheres >> > (tempData);
-        xcudaDeviceSynchronize();
-        xcudaGetLastError();
-        copyToTempKernel<<<blocksForSpheres, threadsForSpheres>>>(tempData);
-        xcudaDeviceSynchronize();
-        xcudaGetLastError();
-        copyFromTempKernel << <blocksForSpheres, threadsForSpheres >> > (tempData);
-        xcudaDeviceSynchronize();
-        xcudaGetLastError();
-
-
         b.mapCudaResource();
 
 
@@ -141,7 +124,6 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
-    tempData.free();
     data.free();
     return 0;
 }

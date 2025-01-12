@@ -103,14 +103,15 @@
     <ClInclude Include="imGui\imstb_rectpack.h" />
     <ClInclude Include="imGui\imstb_textedit.h" />
     <ClInclude Include="imGui\imstb_truetype.h" />
-    <ClInclude Include="lightData.hpp" />
+    <ClInclude Include="lbvh.cuh" />
     <ClInclude Include="mat4.cuh" />
     <ClInclude Include="rendering.hpp" />
+    <ClInclude Include="sortObject.cuh" />
     <ClInclude Include="transformScene.cuh" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
-    <ClInclude Include="spheres.hpp" />
-    <ClInclude Include="spheresData.hpp" />
+    <ClInclude Include="dataObject.hpp" />
+    <ClInclude Include="unifiedObjects.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
@@ -123,12 +124,11 @@
     <ClCompile Include="imGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imGui\imgui_tables.cpp" />
     <ClCompile Include="imGui\imgui_widgets.cpp" />
-    <ClCompile Include="lightData.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
-    <ClCompile Include="spheres.cpp" />
-    <ClCompile Include="spheresData.cpp" />
+    <ClCompile Include="dataObject.cpp" />
+    <ClCompile Include="unifiedObjects.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

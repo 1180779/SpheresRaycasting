@@ -89,14 +89,17 @@
     <ClInclude Include="general.hpp">
       <Filter>source\kernels</Filter>
     </ClInclude>
-    <ClInclude Include="spheresData.hpp">
+    <ClInclude Include="dataObject.hpp">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="spheres.hpp">
+    <ClInclude Include="unifiedObjects.hpp">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="lightData.hpp">
+    <ClInclude Include="lbvh.cuh">
       <Filter>source\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="sortObject.cuh">
+      <Filter>source\kernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -139,13 +142,10 @@
     <ClCompile Include="shaderSource.cpp">
       <Filter>source\global</Filter>
     </ClCompile>
-    <ClCompile Include="spheresData.cpp">
+    <ClCompile Include="dataObject.cpp">
       <Filter>source\dataStructures</Filter>
     </ClCompile>
-    <ClCompile Include="spheres.cpp">
-      <Filter>source\dataStructures</Filter>
-    </ClCompile>
-    <ClCompile Include="lightData.cpp">
+    <ClCompile Include="unifiedObjects.cpp">
       <Filter>source\dataStructures</Filter>
     </ClCompile>
   </ItemGroup>

@@ -16,8 +16,6 @@ static float lastX = 1280 / 2, lastY = 720 / 2;
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 void disableCursor(const rendering& render);
 
-
-
 void disableCursor(const rendering& render)
 {
     glfwSetInputMode(render.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -38,7 +36,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     
-    dim3 blocks = dim3(spheresDataForCallback->sData.count / BLOCK_SIZE + 1);
+    dim3 blocks = dim3(spheresDataForCallback->data.count / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE);
 
     glm::mat4 t = glm::mat4(1.0f);
