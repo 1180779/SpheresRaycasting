@@ -104,3 +104,11 @@ void unifiedObjects::copyDeviceToHost(const unifiedObjects& source)
     xcudaMemcpy(kd, source.kd, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
     xcudaMemcpy(alpha, source.alpha, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
 }
+
+void unifiedObjects::findAABB()
+{
+
+}
+
+
+

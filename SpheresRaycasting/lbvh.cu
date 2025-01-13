@@ -58,7 +58,7 @@ void lbvh::sortByMortonCode()
     int source = 0;
     cudaMemcpy(m_nodeNr, &source, sizeof(int), cudaMemcpyHostToDevice);
 
-    m_mortonData.keys = m_sortObject.keys;
+    m_mortonData.keys = m_sortObject.keysIn;
 
     t.start();
     dim3 blocks = dim3(m_n / BLOCK_SIZE + 1);

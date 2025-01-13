@@ -89,6 +89,10 @@ struct unifiedObjects
     float* kd = nullptr; /* kd */
     float* alpha = nullptr; /* alpha */
 
+    float3 aabbMin;
+    float3 aabbMax;
+    float3 aabbRange;
+
     /* malloc host memory */
     void hMalloc(unsigned int c);
     
@@ -106,6 +110,8 @@ struct unifiedObjects
 
     /* copy from source to current object; from device to hosts */
     void copyDeviceToHost(const unifiedObjects& source);
+
+    void findAABB();
 
     __host__ __device__ unifiedObjectsSingle operator()(int i) 
     {

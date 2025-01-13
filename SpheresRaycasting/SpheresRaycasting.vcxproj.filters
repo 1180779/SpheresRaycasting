@@ -25,6 +25,9 @@
     <Filter Include="source\other">
       <UniqueIdentifier>{8758e20f-9146-4bda-8d16-0bb6fc35adec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\cuda-blhv">
+      <UniqueIdentifier>{d49159bb-92f1-4975-856b-869a99531bc3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu">
@@ -36,6 +39,12 @@
     <CudaCompile Include="unifiedObjects.cu" />
     <CudaCompile Include="sortObject.cu">
       <Filter>source\kernels</Filter>
+    </CudaCompile>
+    <CudaCompile Include="build.cu">
+      <Filter>source\cuda-blhv</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cub_helper.cu">
+      <Filter>source\cuda-blhv</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +121,15 @@
     <ClInclude Include="timer.hpp">
       <Filter>source\other</Filter>
     </ClInclude>
+    <ClInclude Include="cub_helper.h">
+      <Filter>source\cuda-blhv</Filter>
+    </ClInclude>
+    <ClInclude Include="bvh.h">
+      <Filter>source\cuda-blhv</Filter>
+    </ClInclude>
+    <ClInclude Include="cudaInline.h">
+      <Filter>source\cuda-blhv</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">
@@ -159,5 +177,10 @@
     <ClCompile Include="timer.cpp">
       <Filter>source\other</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="cuda-blvh-license.txt">
+      <Filter>source\cuda-blhv</Filter>
+    </Text>
   </ItemGroup>
 </Project>

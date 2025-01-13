@@ -87,14 +87,19 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="build.cu" />
+    <CudaCompile Include="cub_helper.cu" />
     <CudaCompile Include="lbvh.cu" />
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.cuh" />
+    <ClInclude Include="bvh.h" />
     <ClInclude Include="callbacks.cuh" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
+    <ClInclude Include="cub_helper.h" />
+    <ClInclude Include="cudaInline.h" />
     <ClInclude Include="general.hpp" />
     <ClInclude Include="imGuiUi.hpp" />
     <ClInclude Include="imGui\imconfig.h" />
@@ -137,6 +142,9 @@
     <CudaCompile Include="unifiedObjects.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="cuda-blvh-license.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

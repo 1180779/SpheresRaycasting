@@ -1,30 +1,70 @@
 
 #include "sortObject.cuh"
 
+#include <cub/device/device_radix_sort.cuh>
+
+void radix_sort(
+    int num_items,
+    unsigned int* d_keys_in, unsigned int* d_keys_out,
+    unsigned int* d_values_in, unsigned int* d_values_out)
+{
+    // determine temporary device storage requirements
+    void* d_temp_storage = nullptr;
+    size_t temp_storage_bytes = 0;
+    cub::DeviceRadixSort::SortPairs(
+        d_temp_storage, temp_storage_bytes,
+        d_keys_in, d_keys_out, d_values_in, d_values_out, num_items);
+    // allocate temporary storage
+    xcudaMalloc(&d_temp_storage, temp_storage_bytes);
+    // run sorting operation
+    // https://nvlabs.github.io/cub/structcub_1_1_device_radix_sort.html
+    cub::DeviceRadixSort::SortPairs(
+        d_temp_storage, temp_storage_bytes,
+        d_keys_in, d_keys_out, d_values_in, d_values_out, num_items);
+    // free temporary storage
+    xcudaFree(d_temp_storage);
+}
+
 void sortObject::malloc(unifiedObjects& data)
 {
     this->data = data;
-    xcudaMalloc(&keys, sizeof(unsigned int) * data.count);
-    xcudaMalloc(&index, sizeof(int) * data.count);
+    xcudaMalloc(&keysIn, sizeof(unsigned int) * data.count);
+    xcudaMalloc(&indexIn, sizeof(int) * data.count);
+    xcudaMalloc(&keysOut, sizeof(unsigned int) * data.count);
+    xcudaMalloc(&indexOut, sizeof(int) * data.count);
     temp.dMalloc(data.count);
 }
 
 void sortObject::free()
 {
-    xcudaFree(keys);
-    xcudaFree(index);
+    xcudaFree(keysIn);
+    xcudaFree(indexIn);
+    xcudaFree(keysOut);
+    xcudaFree(indexOut);
     temp.dFree();
 }
 
 void sortObject::sort()
 {
     thrust::sequence(
-        thrust::device_ptr<int>(index), 
-        thrust::device_ptr<int>(index + data.count));
-    thrust::sort_by_key(
-        thrust::device_ptr<unsigned int>(keys),
-        thrust::device_ptr<unsigned int>(keys + data.count),
-        thrust::device_ptr<int>(index));
+        thrust::device_ptr<int>(indexIn), 
+        thrust::device_ptr<int>(indexIn + data.count));
+
+    // Determine temporary device storage requirements
+    void* d_temp_storage = nullptr;
+    size_t   temp_storage_bytes = 0;
+
+    cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes,
+        keysIn, keysOut, indexIn, indexOut, data.count);
+
+    xcudaMalloc(&d_temp_storage, temp_storage_bytes);
+
+    // run sorting operation
+    cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes,
+        keysIn, keysOut, indexIn, indexOut, data.count);
+
+    // free memory
+    xcudaFree(d_temp_storage);
 
     dim3 blocks = dim3(data.count / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE);
@@ -42,7 +82,7 @@ __global__ void copyToTempKernel(sortObject data)
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= data.data.count)
         return;
-    int index = data.index[i];
+    int index = data.indexOut[i];
 
     data.temp.x[i] = data.data.x[index];
     data.temp.y[i] = data.data.y[index];

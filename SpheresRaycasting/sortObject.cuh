@@ -14,9 +14,12 @@
 
 struct sortObject
 {
-    bool copied = true;
-    unsigned int* keys;
-    int* index;
+    // need two copies for radix sort from cub
+    unsigned int* keysIn;
+    unsigned int* keysOut;
+    int* indexIn;
+    int* indexOut;
+
     unifiedObjects data;
     unifiedObjects temp;
 
