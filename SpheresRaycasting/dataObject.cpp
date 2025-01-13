@@ -5,6 +5,8 @@
 
 void dataObject::generate(unsigned int count, float rMin, float rMax, float xMin, float xMax, float yMin, float yMax, float zMax, float zMin)
 {
+    float xxMin =  999999.9f;
+    float xxMax = -999999.9f;
     mh_unified.hMalloc(count);
     srand(static_cast <unsigned> (time(0)));
     for (int i = 0; i < count; ++i) {
@@ -21,8 +23,14 @@ void dataObject::generate(unsigned int count, float rMin, float rMax, float xMin
         mh_unified.color[i].y = rand() % 256;
         mh_unified.color[i].z = rand() % 256;
 
-        //std::cout << "x = " << mh_unified.x[i] << ", y = " << mh_unified.y[i] << ", z = " << mh_unified.z[i] << ", r = " << mh_unified.r[i] << std::endl;
+        std::cout << "x = " << mh_unified.x[i] << ", y = " << mh_unified.y[i] << ", z = " << mh_unified.z[i] << ", r = " << mh_unified.r[i] << std::endl;
+        if (mh_unified.x[i] < xxMin)
+            xxMin = mh_unified.x[i];
+        if (mh_unified.x[i] > xxMax)
+            xxMax = mh_unified.x[i];
     }
+
+    std::cout << "x min = " << xxMin << ", xMax = " << xxMax << std::endl;
 
     md_unified.dMalloc(count);
     md_unified.copyHostToDevice(mh_unified);

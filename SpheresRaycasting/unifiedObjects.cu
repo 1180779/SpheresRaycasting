@@ -6,6 +6,7 @@
 #include <thrust/extrema.h>
 #include <thrust/device_ptr.h>
 #include <thrust/pair.h>
+#include "timer.hpp"
 
 void unifiedObjects::hMalloc(unsigned int c)
 {
@@ -110,18 +111,111 @@ void unifiedObjects::copyDeviceToHost(const unifiedObjects& source)
     xcudaMemcpy(alpha, source.alpha, sizeof(float) * source.count, cudaMemcpyDeviceToHost);
 }
 
+//__device__ float fatomicMax(float* addr, float value)
+//{
+//    float old = *addr, assumed;
+//    if (old >= value)
+//        return old;
+//    do
+//    {
+//        assumed = old;
+//        old = atomicCAS((unsigned int*)addr, __float_as_int(assumed), __float_as_int(value));
+//    } while (old != assumed);
+//    return old;
+//}
+//
+//__device__ float fatomicMin(float* addr, float value)
+//{
+//    float old = *addr, assumed;
+//    if (old <= value)
+//        return old;
+//    do
+//    {
+//        assumed = old;
+//        old = atomicCAS((unsigned int*)addr, __float_as_int(assumed), __float_as_int(value));
+//    } while (old != assumed);
+//    return old;
+//}
+//
+//__global__ void minmaxKernel(const float* arr, int count, float* minOut, float* maxOut) {
+//    extern __shared__ float sharedMinMax[];
+//    float* s_min = sharedMinMax;
+//    float* s_max = sharedMinMax + blockDim.x;
+//
+//    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+//    int localTid = threadIdx.x;
+//
+//    if (tid < count) {
+//        s_min[localTid] = arr[tid];
+//        s_max[localTid] = arr[tid];
+//    }
+//    else {
+//        s_min[localTid] = FLT_MAX;
+//        s_max[localTid] = -FLT_MAX;
+//    }
+//    __syncthreads();
+//
+//    for (int offset = blockDim.x / 2; offset > 0; offset >>= 1) {
+//        if (localTid < offset && tid + offset < count) {
+//            s_min[localTid] = fminf(s_min[localTid], s_min[localTid + offset]);
+//            s_max[localTid] = fmaxf(s_max[localTid], s_max[localTid + offset]);
+//        }
+//        __syncthreads();
+//    }
+//
+//    if (localTid == 0) {
+//        *minOut = s_min[0];
+//        *maxOut = s_max[0];
+//    }
+//}
+//
+//
+//
+
+
 void unifiedObjects::findAABB()
 {
-    
+    timer t;
+
+    //float* cRes;
+    //cudaMalloc(&cRes, sizeof(float) * 2);
+
+    //// custom kernel for comparison
+    //t.start();
+    //int blockSize = 256;
+    //int numBlocks = (count + blockSize - 1) / blockSize;
+    //minmaxKernel << <numBlocks, blockSize, 2 * blockSize * sizeof(float) >> > (x, count, cRes, cRes + 1);
+    //xcudaDeviceSynchronize();
+    //xcudaGetLastError();
+    //t.stop("\tcustom minmax kernel");
+
+    t.start();
     auto xP = thrust::minmax_element(thrust::device_ptr<float>(x), thrust::device_ptr<float>(x + count));
+    t.stop("\tminmax_element x");
+
+    t.start();
     auto yP = thrust::minmax_element(thrust::device_ptr<float>(y), thrust::device_ptr<float>(y + count));
+    t.stop("\tminmax_element y");
+    
+    t.start();
     auto zP = thrust::minmax_element(thrust::device_ptr<float>(z), thrust::device_ptr<float>(z + count));
+    t.stop("\tminmax_element z");
+    
+    //float minCustom;
+    //float maxCustom;
+    //xcudaMemcpy(&minCustom, cRes, sizeof(float), cudaMemcpyDeviceToHost);
+    //xcudaMemcpy(&maxCustom, cRes + 1, sizeof(float), cudaMemcpyDeviceToHost);
+
+    //xcudaFree(cRes);
+
+    t.start();
     xcudaMemcpy(&aabbMin.x, xP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
     xcudaMemcpy(&aabbMax.x, xP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
     xcudaMemcpy(&aabbMin.y, yP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
     xcudaMemcpy(&aabbMax.y, yP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
     xcudaMemcpy(&aabbMin.z, zP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
     xcudaMemcpy(&aabbMax.z, zP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    t.stop("\tcopy back");
 }
 
 
