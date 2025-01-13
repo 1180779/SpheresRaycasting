@@ -4,27 +4,13 @@
 #include <thrust/extrema.h>
 #include <thrust/device_ptr.h>
 
-
-void mortonCodeData::malloc()
-{
-    xcudaMalloc(&x, sizeof(float) * n);
-    xcudaMalloc(&y, sizeof(float) * n);
-    xcudaMalloc(&z, sizeof(float) * n);
-}
-
-void mortonCodeData::free()
-{
-    xcudaFree(x);
-    xcudaFree(y);
-    xcudaFree(z);
-}
+#include "timer.hpp"
 
 lbvh::lbvh(unifiedObjects objects)
     : m_n(objects.count), m_objects(objects)
 {
     m_sortObject.malloc(objects);
     m_mortonData.n = objects.count;
-    m_mortonData.malloc();
     xcudaMalloc(&m_nodes, sizeof(lbvhNode) * (1024 * 256));
     xcudaMalloc(&m_nodeNr, sizeof(int));
 }
@@ -32,15 +18,17 @@ lbvh::lbvh(unifiedObjects objects)
 lbvh::~lbvh()
 {
     m_sortObject.free();
-    m_mortonData.free();
     xcudaFree(m_nodes);
     xcudaFree(m_nodeNr);
 }
 
-void lbvh::normalizeCoords()
+void lbvh::sortByMortonCode()
 {
     float3 minCoords;
     float3 maxCoords;
+
+    timer t;
+    t.start();
 
     minCoords.x = *thrust::min_element(
         thrust::device_ptr<float>(m_objects.x),
@@ -61,32 +49,28 @@ void lbvh::normalizeCoords()
     maxCoords.z = *thrust::max_element(
         thrust::device_ptr<float>(m_objects.z),
         thrust::device_ptr<float>(m_objects.z + m_objects.count));
+    t.stop("find min max of scene");
 
     float3 range;
     range.x = maxCoords.x - minCoords.x;
 
-    dim3 blocks = dim3(m_mortonData.n / BLOCK_SIZE + 1);
-    dim3 threads = dim3(BLOCK_SIZE);
-    normalizeCoordinatesKernel<<<blocks, threads>>>(m_mortonData, m_objects, range, minCoords);
-    xcudaDeviceSynchronize();
-    xcudaGetLastError();
-}
-
-void lbvh::sortByMortonCode()
-{
     // clear the tree
     int source = 0;
     cudaMemcpy(m_nodeNr, &source, sizeof(int), cudaMemcpyHostToDevice);
 
     m_mortonData.keys = m_sortObject.keys;
 
+    t.start();
     dim3 blocks = dim3(m_n / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE);
-    computeMortonCodeKernel<<<blocks, threads>>>(m_mortonData);
+    computeMortonCodeKernel<<<blocks, threads>>>(m_mortonData, m_objects, minCoords, range);
     xcudaDeviceSynchronize();
     xcudaGetLastError();
+    t.stop("computeMortonCodeKernel");
 
+    t.start();
     m_sortObject.sort();
+    t.stop("sort by morton codes");
 }
 
 void lbvh::construct()
@@ -98,42 +82,44 @@ void lbvh::construct()
     // TODO: create bounding boxes from lowest level up
 }
 
-__global__ void normalizeCoordinatesKernel(mortonCodeData codes, unifiedObjects objects, float3 range, float3 min)
+__device__ unsigned int expandBits(unsigned int v)
+{
+    v = (v * 0x00010001u) & 0xFF0000FFu;
+    v = (v * 0x00000101u) & 0x0F00F00Fu;
+    v = (v * 0x00000011u) & 0xC30C30C3u;
+    v = (v * 0x00000005u) & 0x49249249u;
+    return v;
+}
+
+__device__ unsigned int morton3D(float x, float y, float z)
+{
+    x = min(max(x * 1024.0f, 0.0f), 1023.0f);
+    y = min(max(y * 1024.0f, 0.0f), 1023.0f);
+    z = min(max(z * 1024.0f, 0.0f), 1023.0f);
+    unsigned int xx = expandBits((unsigned int)x);
+    unsigned int yy = expandBits((unsigned int)y);
+    unsigned int zz = expandBits((unsigned int)z);
+    return xx * 4 + yy * 2 + zz;
+}
+
+__global__ void computeMortonCodeKernel(mortonCodeData codes, unifiedObjects objects, float3 min, float3 range)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= codes.n)
         return;
-    codes.x[i] = (objects.x[i] - min.x) / range.x;
-    codes.y[i] = (objects.y[i] - min.y) / range.y;
-    codes.z[i] = (objects.z[i] - min.z) / range.z;
+
+    float x = (objects.x[i] - min.x) / range.x;
+    float y = (objects.y[i] - min.y) / range.y;
+    float z = (objects.z[i] - min.z) / range.z;
+    codes.keys[i] = morton3D(x, y, z);
 }
 
-__global__ void computeMortonCodeKernel(mortonCodeData data)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= data.n)
-        return;
-
-    int mortonX = (int)(data.x[i] * (1 << data.bitsPerAxis));
-    int mortonY = (int)(data.z[i] * (1 << data.bitsPerAxis));
-    int mortonZ = (int)(data.y[i] * (1 << data.bitsPerAxis));
-
-    /* key is morton code */
-    int mortonCode = 0;
-    for (int i = 0; i < data.bitsPerAxis; ++i) {
-        mortonCode |= ((mortonX >> i) & 1) << (3 * i);
-        mortonCode |= ((mortonY >> i) & 1) << (3 * i + 1);
-        mortonCode |= ((mortonZ >> i) & 1) << (3 * i + 2);
-    }
-    data.keys[i] = mortonCode;
-}
-
-__global__ void generateHierarchyRunner(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes) 
+__global__ void generateHierarchyRunner(unsigned int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes) 
 {
     generateHierarchy(sortedMortonCodes, first, last, nodeNr, nodes);
 }
 
-__device__ int generateHierarchy(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes)
+__device__ int generateHierarchy(unsigned int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes)
 {
     if (first == last)
     {
@@ -164,7 +150,7 @@ __device__ int generateHierarchy(int* sortedMortonCodes, int first, int last, in
 
 // copied from
 // https://developer.nvidia.com/blog/thinking-parallel-part-iii-tree-construction-gpu/
-__device__ int findSplit(int* sortedMortonCodes, int first, int last)
+__device__ int findSplit(unsigned int* sortedMortonCodes, int first, int last)
 {
     // Identical Morton codes => split the range in the middle.
 

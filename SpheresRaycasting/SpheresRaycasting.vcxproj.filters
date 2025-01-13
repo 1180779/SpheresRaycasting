@@ -33,8 +33,10 @@
     <CudaCompile Include="lbvh.cu">
       <Filter>source\dataStructures</Filter>
     </CudaCompile>
-    <CudaCompile Include="sortObject.cu" />
     <CudaCompile Include="unifiedObjects.cu" />
+    <CudaCompile Include="sortObject.cu">
+      <Filter>source\kernels</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imGui\imstb_truetype.h">

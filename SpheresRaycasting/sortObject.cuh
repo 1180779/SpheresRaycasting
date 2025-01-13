@@ -15,7 +15,7 @@
 struct sortObject
 {
     bool copied = true;
-    int* keys;
+    unsigned int* keys;
     int* index;
     unifiedObjects data;
     unifiedObjects temp;

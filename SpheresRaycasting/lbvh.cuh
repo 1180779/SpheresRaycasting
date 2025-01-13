@@ -33,23 +33,22 @@ public:
 /* the coordinates (and r) are scaled to [0, 1] range */
 struct mortonCodeData {
     int n;
-    int bitsPerAxis = 6;
-
-    int* keys;
-    float* x;
-    float* y;
-    float* z;
-
-    void malloc();
-    void free();
+    unsigned int* keys;
 };
 
-__global__ void normalizeCoordinatesKernel(mortonCodeData codes, unifiedObjects objects, float3 range, float3 min);
-__global__ void computeMortonCodeKernel(mortonCodeData data);
+// Expands a 10-bit integer into 30 bits
+// by inserting 2 zeros after each bit.
+__device__ unsigned int expandBits(unsigned int v);
 
-__global__ void generateHierarchyRunner(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
-__device__ int generateHierarchy(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
-__device__ int findSplit(int* sortedMortonCodes, int first, int last);
+// Calculates a 30-bit Morton code for the
+// given 3D point located within the unit cube [0,1].
+__device__ unsigned int morton3D(float x, float y, float z);
+
+__global__ void computeMortonCodeKernel(mortonCodeData codes, unifiedObjects objects, float3 min, float3 range);
+
+__global__ void generateHierarchyRunner(unsigned int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
+__device__ int generateHierarchy(unsigned int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
+__device__ int findSplit(unsigned int* sortedMortonCodes, int first, int last);
 
 class lbvh
 {

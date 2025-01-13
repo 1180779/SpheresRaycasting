@@ -4,7 +4,7 @@
 void sortObject::malloc(unifiedObjects& data)
 {
     this->data = data;
-    xcudaMalloc(&keys, sizeof(int) * data.count);
+    xcudaMalloc(&keys, sizeof(unsigned int) * data.count);
     xcudaMalloc(&index, sizeof(int) * data.count);
     temp.dMalloc(data.count);
 }
@@ -22,8 +22,8 @@ void sortObject::sort()
         thrust::device_ptr<int>(index), 
         thrust::device_ptr<int>(index + data.count));
     thrust::sort_by_key(
-        thrust::device_ptr<int>(keys),
-        thrust::device_ptr<int>(keys + data.count),
+        thrust::device_ptr<unsigned int>(keys),
+        thrust::device_ptr<unsigned int>(keys + data.count),
         thrust::device_ptr<int>(index));
 
     dim3 blocks = dim3(data.count / BLOCK_SIZE + 1);

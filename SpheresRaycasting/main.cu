@@ -105,14 +105,7 @@ int main(int, char**)
         std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
 
         timer t;
-
-        t.start();
-        tree.normalizeCoords();
-        t.stop("normalizeCoords");
-
-        t.start();
         tree.sortByMortonCode();
-        t.stop("sortByMortonCode");
 
         t.start();
         tree.construct();
