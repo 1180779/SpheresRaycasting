@@ -1,6 +1,11 @@
 
-#include "unifiedObjects.cuh"
 #include <stdexcept>
+#include "unifiedObjects.cuh"
+#include "cudaInline.h"
+
+#include <thrust/extrema.h>
+#include <thrust/device_ptr.h>
+#include <thrust/pair.h>
 
 void unifiedObjects::hMalloc(unsigned int c)
 {
@@ -107,7 +112,16 @@ void unifiedObjects::copyDeviceToHost(const unifiedObjects& source)
 
 void unifiedObjects::findAABB()
 {
-
+    
+    auto xP = thrust::minmax_element(thrust::device_ptr<float>(x), thrust::device_ptr<float>(x + count));
+    auto yP = thrust::minmax_element(thrust::device_ptr<float>(y), thrust::device_ptr<float>(y + count));
+    auto zP = thrust::minmax_element(thrust::device_ptr<float>(z), thrust::device_ptr<float>(z + count));
+    xcudaMemcpy(&aabbMin.x, xP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    xcudaMemcpy(&aabbMax.x, xP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    xcudaMemcpy(&aabbMin.y, yP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    xcudaMemcpy(&aabbMax.y, yP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    xcudaMemcpy(&aabbMin.z, zP.first.get(), sizeof(float), cudaMemcpyDeviceToHost);
+    xcudaMemcpy(&aabbMax.z, zP.second.get(), sizeof(float), cudaMemcpyDeviceToHost);
 }
 
 

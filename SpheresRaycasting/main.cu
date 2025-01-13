@@ -107,6 +107,10 @@ int main(int, char**)
 
         timer t;
         t.start();
+        tree.md_objects.findAABB();
+        t.stop("findAABB");
+
+        t.start();
         tree.build();
         t.stop("build bvh (all parts)");
 
