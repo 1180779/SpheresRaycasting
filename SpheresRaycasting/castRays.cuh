@@ -13,6 +13,7 @@
 
 #include "general.hpp"
 #include "unifiedObjects.cuh"
+#include "bvh.h"
 
 struct castRaysData
 {
@@ -24,19 +25,25 @@ struct castRaysData
     unifiedObjects data;
 };
 
-__global__ void castRaysKernel(castRaysData data)
+__device__ __forceinline__ bool rayHit(float3 aabbMin, float3 aabbMax, float3 o) 
+{
+    return aabbMin.x < o.x && o.x < aabbMax.x &&
+        aabbMin.y < o.y && o.y < aabbMax.y;
+}
+
+__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
 
-    if (x >= data.width || y >= data.height)
+    if (x >= width || y >= height)
         return;
 
     // ray origin
     float3 o;
     o.x = x;
     o.y = y;
-    o.z = data.z;
+    o.z = 0;
 
     // find closes sphere (or light) by z coordinate
     unifiedObject closest;
@@ -45,19 +52,39 @@ __global__ void castRaysKernel(castRaysData data)
     closest.z = FLT_MAX / 2.f;
     closest.r = 1.f;
 
-    for (int i = 0; i < data.data.count; ++i) {
-        __syncthreads();
-        // check z (if closer by z coordinate)
-        if (!(data.data.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
-            continue;
+    // move throught the bhv tree
+    bvh_node* stack[64]; // local stack
+    int stack_ptr = 0;
+    stack[stack_ptr++] = &bvh.internal_nodes[0];
+    while (stack_ptr > 0) {
+        bvh_node* current = stack[--stack_ptr];
 
-        //check x and y
-        float dist2 = (data.data.x[i] - o.x) * (data.data.x[i] - o.x) + (data.data.y[i] - o.y) * (data.data.y[i] - o.y);
-        if (dist2 > data.data.r[i] * data.data.r[i])
+        if (!rayHit(current->min, current->max, o)) // no hit with the box, can skip this subtree
             continue;
+        if (current->is_leaf()) 
+        {
+            int i = current->object_id;
+            // check if closer
+            
+            // check z (if closer by z coordinate)
+            if (!(bvh.md_objects.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
+                continue;
 
-        closest = data.data(i);
+            //check x and y
+            float dist2 = (bvh.md_objects.x[i] - o.x) * (bvh.md_objects.x[i] - o.x) + (bvh.md_objects.y[i] - o.y) * (bvh.md_objects.y[i] - o.y);
+            if (dist2 > bvh.md_objects.r[i] * bvh.md_objects.r[i])
+                continue;
+            closest = bvh.md_objects(i);
+        }
+        else 
+        {
+            if (current->child_a) 
+                stack[stack_ptr++] = current->child_a;
+            if (current->child_b) 
+                stack[stack_ptr++] = current->child_b;
+        }
     }
+    __syncthreads();
 
     // if found no sphere return
     if (closest.x == FLT_MAX / 2.f)
@@ -67,7 +94,7 @@ __global__ void castRaysKernel(castRaysData data)
         notFoundWriteData.y = 255;
         notFoundWriteData.z = 255;
         notFoundWriteData.w = 255;
-        surf2Dwrite(notFoundWriteData, data.surfaceObject, 4 * x, y);
+        surf2Dwrite(notFoundWriteData, surfaceObject, 4 * x, y);
         return;
     }
 
@@ -108,7 +135,7 @@ __global__ void castRaysKernel(castRaysData data)
     writeData.y = closest.color.y;
     writeData.z = closest.color.z;
     writeData.w = 255;
-    surf2Dwrite(writeData, data.surfaceObject, 4 * x, y);
+    surf2Dwrite(writeData, surfaceObject, 4 * x, y);
 }
 
 #endif

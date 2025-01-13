@@ -54,10 +54,7 @@ int main(int, char**)
 
 
     dataObject data;
-    data.generate(10000, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
-
-    castRaysData raysData;
-    raysData.data = data.md_unified;
+    data.generate(100, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
    
     transformData tData;
     tData.data = data.md_unified;
@@ -116,15 +113,13 @@ int main(int, char**)
 
         b.mapCudaResource();
 
+        //tree.toHost();
 
-        /*t.start();
-        raysData.width = b.m_maxWidth;
-        raysData.height = b.m_maxHeight;
-        raysData.surfaceObject = b.m_surfaceObject;
-        castRaysKernel << <blocks, threads >> > (raysData);
+        t.start();
+        castRaysKernel<<<blocks, threads>>>(tree, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
-        t.stop("castRaysKernel");*/
+        t.stop("castRaysKernel");
 
         //data.mh_spheres.copyDeviceToHost(raysData.sData);
         //std::cout << "\n\n";

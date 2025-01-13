@@ -38,6 +38,20 @@ struct bvh_node {
     }
 };
 
+static void traverse(bvh_node* node) 
+{
+    if (!node)
+        return;
+    traverse(node->child_a);
+    if (!node->child_a) 
+    {
+        std::cout << "objectId = " << node->object_id << std::endl;
+        std::cout << "\tmin = (" << node->min.x << ", " << node->min.y << ", " << node->min.z << ")" << std::endl;
+        std::cout << "\tmax = (" << node->max.x << ", " << node->max.y << ", " << node->max.z << ")" << std::endl;
+    }
+    traverse(node->child_b);
+}
+
 struct bvh {
     /// Leaf nodes, one for every photon data element.
     bvh_node* leaf_nodes;
@@ -67,6 +81,53 @@ struct bvh {
         xcudaFree(leaf_nodes);
         xcudaFree(internal_nodes);
     }
+
+    void toHost() 
+    {
+        bvh_node* h_leaf = new bvh_node[md_objects.count];
+        bvh_node* h_internal = new bvh_node[md_objects.count - 1];
+        cudaMemcpy(h_leaf, leaf_nodes, sizeof(bvh_node) * md_objects.count, cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_internal, internal_nodes, sizeof(bvh_node) * (md_objects.count - 1), cudaMemcpyDeviceToHost);
+
+        void* helper = new void*;
+        cudaMemcpy(helper, internal_nodes, sizeof(void*), cudaMemcpyDeviceToHost);
+
+        for(int i = 0; i < md_objects.count - 1; ++i) 
+        {
+            bvh_node* node = &h_internal[i];
+            std::cout << "internal" << std::endl;
+            std::cout << "\tchild_a = " << node->child_a << std::endl;
+            std::cout << "\tchild_b = " << node->child_b << std::endl;
+            std::cout << "\tmin = (" << node->min.x << ", " << node->min.y << ", " << node->min.z << ")" << std::endl;
+            std::cout << "\tmax = (" << node->max.x << ", " << node->max.y << ", " << node->max.z << ")" << std::endl;
+
+            if (node->child_a > h_leaf)
+            {
+                node->child_a = node->child_a - h_leaf + h_leaf;
+            }
+            else 
+            {
+                node->child_a = node->child_a - internal_nodes + h_internal;
+            }
+
+
+            if (node->child_b > h_leaf)
+            {
+                node->child_b = node->child_b - h_leaf + h_leaf;
+            }
+            else
+            {
+                node->child_b = node->child_b - internal_nodes + h_internal;
+            }
+        }
+
+        std::cout << "\ninternal nodes: \n";
+        traverse(&h_internal[0]);
+
+        delete[] h_leaf;
+        delete[] h_internal;
+    }
 };
+
 
 

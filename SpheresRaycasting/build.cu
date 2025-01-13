@@ -58,7 +58,7 @@ __global__ void assign_morton(bvh bvh)
 
     // normalize position
     float3 norm = (pos - bvh.md_objects.aabbMin) / bvh.md_objects.aabbRange;
-    norm = max(min(norm, 1.0f), 1.0f);
+    norm = max(min(norm, 1.0f), 0.0f);
 
     // obtain and set morton code based on normalized position
     bvh.md_sortObject.keysIn[thread_id] = morton_3d(norm.x, norm.y, norm.z);
@@ -75,13 +75,13 @@ __global__ void leaf_nodes(int* sorted_object_ids, int num_objects, bvh bvh)
     // no need to set parent to nullptr, each child will have a parent
     bvh.leaf_nodes[thread_id].object_id = thread_id; // sorted_object_ids[thread_id]; // thread id?
     // needed to recognize that this node is a leaf
-    bvh.leaf_nodes[thread_id].child_a = nullptr;
+    bvh.leaf_nodes[thread_id].child_a = NULL;
 
     // need to set for internal node parent to nullptr, for testing later
     // there is one less internal node than leaf node, test for that
     if (thread_id >= num_objects - 1) 
         return;
-    bvh.internal_nodes[thread_id].parent = nullptr;
+    bvh.internal_nodes[thread_id].parent = NULL;
 }
 
 __forceinline__ __device__ int delta(int a, int b, unsigned int n, unsigned int* c, unsigned int ka)
