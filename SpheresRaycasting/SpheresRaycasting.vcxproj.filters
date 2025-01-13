@@ -22,6 +22,9 @@
     <Filter Include="source\dataStructures">
       <UniqueIdentifier>{0f9303db-cdd4-41ab-a008-51ec2e034da6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\other">
+      <UniqueIdentifier>{8758e20f-9146-4bda-8d16-0bb6fc35adec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu">
@@ -30,6 +33,8 @@
     <CudaCompile Include="lbvh.cu">
       <Filter>source\dataStructures</Filter>
     </CudaCompile>
+    <CudaCompile Include="sortObject.cu" />
+    <CudaCompile Include="unifiedObjects.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imGui\imstb_truetype.h">
@@ -95,14 +100,15 @@
     <ClInclude Include="dataObject.hpp">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="unifiedObjects.hpp">
+    <ClInclude Include="lbvh.cuh">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="unifiedObjects.cuh" />
     <ClInclude Include="sortObject.cuh">
       <Filter>source\kernels</Filter>
     </ClInclude>
-    <ClInclude Include="lbvh.cuh">
-      <Filter>source\dataStructures</Filter>
+    <ClInclude Include="timer.hpp">
+      <Filter>source\other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -148,8 +154,8 @@
     <ClCompile Include="dataObject.cpp">
       <Filter>source\dataStructures</Filter>
     </ClCompile>
-    <ClCompile Include="unifiedObjects.cpp">
-      <Filter>source\dataStructures</Filter>
+    <ClCompile Include="timer.cpp">
+      <Filter>source\other</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

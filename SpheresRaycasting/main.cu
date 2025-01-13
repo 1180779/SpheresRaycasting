@@ -14,12 +14,11 @@
 #include "imGuiUi.hpp"
 
 #include "shader.hpp"
-
 #include "mat4.cuh"
-
 #include "dataObject.hpp"
-
 #include "lbvh.cuh"
+
+#include "timer.hpp"
 
 void matTests() {
     glm::mat4 tGLM = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -55,7 +54,7 @@ int main(int, char**)
 
 
     dataObject data;
-    data.generate(200, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
+    data.generate(3000, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
 
     castRaysData raysData;
     raysData.data = data.md_unified;
@@ -103,18 +102,33 @@ int main(int, char**)
         render.clearColor();
         glClear(GL_DEPTH_BUFFER_BIT);
 
+        std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
+
+        timer t;
+
+        t.start();
+        tree.normalizeCoords();
+        t.stop("normalizeCoords");
+
+        t.start();
         tree.sortByMortonCode();
+        t.stop("sortByMortonCode");
+
+        t.start();
         tree.construct();
+        t.stop("construct");
 
         b.mapCudaResource();
 
 
+        /*t.start();
         raysData.width = b.m_maxWidth;
         raysData.height = b.m_maxHeight;
         raysData.surfaceObject = b.m_surfaceObject;
         castRaysKernel << <blocks, threads >> > (raysData);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
+        t.stop("castRaysKernel");*/
 
         //data.mh_spheres.copyDeviceToHost(raysData.sData);
         //std::cout << "\n\n";

@@ -110,6 +110,7 @@
     <ClInclude Include="mat4.cuh" />
     <ClInclude Include="rendering.hpp" />
     <ClInclude Include="sortObject.cuh" />
+    <ClInclude Include="timer.hpp" />
     <ClInclude Include="transformScene.cuh" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="dataObject.cpp" />
+    <ClCompile Include="timer.cpp" />
     <CudaCompile Include="sortObject.cu" />
     <CudaCompile Include="unifiedObjects.cu">
       <FileType>CppCode</FileType>

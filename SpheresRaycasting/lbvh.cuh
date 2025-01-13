@@ -39,19 +39,26 @@ struct mortonCodeData {
     float* x;
     float* y;
     float* z;
+
+    void malloc();
+    void free();
 };
 
-__global__ void computeMortonCode(mortonCodeData data);
+__global__ void normalizeCoordinatesKernel(mortonCodeData codes, unifiedObjects objects, float3 range, float3 min);
+__global__ void computeMortonCodeKernel(mortonCodeData data);
+
+__global__ void generateHierarchyRunner(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
 __device__ int generateHierarchy(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes);
 __device__ int findSplit(int* sortedMortonCodes, int first, int last);
 
-class lbvh 
+class lbvh
 {
 public:
     /* n - number of objects in scene */
     lbvh(unifiedObjects objects);
     ~lbvh();
 
+    void normalizeCoords();
     void sortByMortonCode();
     void construct();
 
@@ -64,6 +71,3 @@ public:
 };
 
 #endif
-
-
-

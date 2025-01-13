@@ -1,10 +1,30 @@
 
 #include "lbvh.cuh"
 
+#include <thrust/extrema.h>
+#include <thrust/device_ptr.h>
+
+
+void mortonCodeData::malloc()
+{
+    xcudaMalloc(&x, sizeof(float) * n);
+    xcudaMalloc(&y, sizeof(float) * n);
+    xcudaMalloc(&z, sizeof(float) * n);
+}
+
+void mortonCodeData::free()
+{
+    xcudaFree(x);
+    xcudaFree(y);
+    xcudaFree(z);
+}
+
 lbvh::lbvh(unifiedObjects objects)
     : m_n(objects.count), m_objects(objects)
 {
     m_sortObject.malloc(objects);
+    m_mortonData.n = objects.count;
+    m_mortonData.malloc();
     xcudaMalloc(&m_nodes, sizeof(lbvhNode) * (1024 * 256));
     xcudaMalloc(&m_nodeNr, sizeof(int));
 }
@@ -12,8 +32,44 @@ lbvh::lbvh(unifiedObjects objects)
 lbvh::~lbvh()
 {
     m_sortObject.free();
+    m_mortonData.free();
     xcudaFree(m_nodes);
     xcudaFree(m_nodeNr);
+}
+
+void lbvh::normalizeCoords()
+{
+    float3 minCoords;
+    float3 maxCoords;
+
+    minCoords.x = *thrust::min_element(
+        thrust::device_ptr<float>(m_objects.x),
+        thrust::device_ptr<float>(m_objects.x + m_objects.count));
+    minCoords.y = *thrust::min_element(
+        thrust::device_ptr<float>(m_objects.y),
+        thrust::device_ptr<float>(m_objects.y + m_objects.count));
+    minCoords.z = *thrust::min_element(
+        thrust::device_ptr<float>(m_objects.z),
+        thrust::device_ptr<float>(m_objects.z + m_objects.count));
+
+    maxCoords.x = *thrust::max_element(
+        thrust::device_ptr<float>(m_objects.x),
+        thrust::device_ptr<float>(m_objects.x + m_objects.count));
+    maxCoords.y = *thrust::max_element(
+        thrust::device_ptr<float>(m_objects.y),
+        thrust::device_ptr<float>(m_objects.y + m_objects.count));
+    maxCoords.z = *thrust::max_element(
+        thrust::device_ptr<float>(m_objects.z),
+        thrust::device_ptr<float>(m_objects.z + m_objects.count));
+
+    float3 range;
+    range.x = maxCoords.x - minCoords.x;
+
+    dim3 blocks = dim3(m_mortonData.n / BLOCK_SIZE + 1);
+    dim3 threads = dim3(BLOCK_SIZE);
+    normalizeCoordinatesKernel<<<blocks, threads>>>(m_mortonData, m_objects, range, minCoords);
+    xcudaDeviceSynchronize();
+    xcudaGetLastError();
 }
 
 void lbvh::sortByMortonCode()
@@ -22,16 +78,11 @@ void lbvh::sortByMortonCode()
     int source = 0;
     cudaMemcpy(m_nodeNr, &source, sizeof(int), cudaMemcpyHostToDevice);
 
-    m_mortonData;
     m_mortonData.keys = m_sortObject.keys;
-    m_mortonData.x = m_objects.x;
-    m_mortonData.y = m_objects.y;
-    m_mortonData.z = m_objects.z;
-    m_mortonData.n = m_n;
 
     dim3 blocks = dim3(m_n / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE);
-    computeMortonCode << <blocks, threads >> > (m_mortonData);
+    computeMortonCodeKernel<<<blocks, threads>>>(m_mortonData);
     xcudaDeviceSynchronize();
     xcudaGetLastError();
 
@@ -40,14 +91,24 @@ void lbvh::sortByMortonCode()
 
 void lbvh::construct()
 {
-    //generateHierarchyRunner << <1, 1 >> > (m_mortonData.keys, 0, m_n - 1, m_nodeNr, m_nodes);
-    //xcudaDeviceSynchronize();
-    //xcudaGetLastError();
+    generateHierarchyRunner << <1, 1 >> > (m_mortonData.keys, 0, m_n - 1, m_nodeNr, m_nodes);
+    xcudaDeviceSynchronize();
+    xcudaGetLastError();
 
     // TODO: create bounding boxes from lowest level up
 }
 
-__global__ void computeMortonCode(mortonCodeData data)
+__global__ void normalizeCoordinatesKernel(mortonCodeData codes, unifiedObjects objects, float3 range, float3 min)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= codes.n)
+        return;
+    codes.x[i] = (objects.x[i] - min.x) / range.x;
+    codes.y[i] = (objects.y[i] - min.y) / range.y;
+    codes.z[i] = (objects.z[i] - min.z) / range.z;
+}
+
+__global__ void computeMortonCodeKernel(mortonCodeData data)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= data.n)
@@ -65,6 +126,11 @@ __global__ void computeMortonCode(mortonCodeData data)
         mortonCode |= ((mortonZ >> i) & 1) << (3 * i + 2);
     }
     data.keys[i] = mortonCode;
+}
+
+__global__ void generateHierarchyRunner(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes) 
+{
+    generateHierarchy(sortedMortonCodes, first, last, nodeNr, nodes);
 }
 
 __device__ int generateHierarchy(int* sortedMortonCodes, int first, int last, int* nodeNr, lbvhNode* nodes)
