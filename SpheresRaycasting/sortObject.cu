@@ -63,6 +63,8 @@ void sortObject::sort()
     cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes,
         keysIn, keysOut, indexIn, indexOut, data.count);
 
+    xcudaDeviceSynchronize();
+    xcudaGetLastError();
     // free memory
     xcudaFree(d_temp_storage);
 

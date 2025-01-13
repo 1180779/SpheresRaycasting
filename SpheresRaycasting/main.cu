@@ -16,7 +16,7 @@
 #include "shader.hpp"
 #include "mat4.cuh"
 #include "dataObject.hpp"
-#include "lbvh.cuh"
+#include "bvh.h"
 
 #include "timer.hpp"
 
@@ -54,7 +54,7 @@ int main(int, char**)
 
 
     dataObject data;
-    data.generate(3000, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
+    data.generate(10000, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
 
     castRaysData raysData;
     raysData.data = data.md_unified;
@@ -70,7 +70,8 @@ int main(int, char**)
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
 
-    lbvh tree(data.md_unified);
+    bvh tree;
+    tree.malloc(data.md_unified);
 
     // Main loop
     while (!glfwWindowShouldClose(render.window))
@@ -102,14 +103,12 @@ int main(int, char**)
         render.clearColor();
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
+        //std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
 
         timer t;
-        tree.sortByMortonCode();
-
         t.start();
-        tree.construct();
-        t.stop("construct");
+        tree.build();
+        t.stop("build bvh (all parts)");
 
         b.mapCudaResource();
 
@@ -136,6 +135,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
+    tree.free();
     data.free();
     return 0;
 }

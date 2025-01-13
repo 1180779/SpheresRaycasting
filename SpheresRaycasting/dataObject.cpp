@@ -21,7 +21,7 @@ void dataObject::generate(unsigned int count, float rMin, float rMax, float xMin
         mh_unified.color[i].y = rand() % 256;
         mh_unified.color[i].z = rand() % 256;
 
-        std::cout << "x = " << mh_unified.x[i] << ", y = " << mh_unified.y[i] << ", z = " << mh_unified.z[i] << ", r = " << mh_unified.r[i] << std::endl;
+        //std::cout << "x = " << mh_unified.x[i] << ", y = " << mh_unified.y[i] << ", z = " << mh_unified.z[i] << ", r = " << mh_unified.r[i] << std::endl;
     }
 
     md_unified.dMalloc(count);

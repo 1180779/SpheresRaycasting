@@ -20,6 +20,7 @@
 
 #include "bvh.h"
 #include "cub_helper.h"
+#include "timer.hpp"
 
 /// Expands a 10-bit integer into 30 bits by inserting 2 zeros after each bit.
 __forceinline__ __device__ unsigned int expand_bits(unsigned int v)
@@ -50,7 +51,10 @@ __global__ void assign_morton(bvh bvh)
     if (thread_id >= bvh.md_objects.count) 
         return;
 
-    float3 pos = make_float3(bvh.md_objects.x[thread_id], bvh.md_objects.y[thread_id], bvh.md_objects.z[thread_id]);
+    float3 pos = make_float3(
+        bvh.md_objects.x[thread_id], 
+        bvh.md_objects.y[thread_id], 
+        bvh.md_objects.z[thread_id]);
 
     // normalize position
     float3 norm = (pos - bvh.md_objects.aabbMin) / bvh.md_objects.aabbRange;
@@ -264,37 +268,49 @@ void bvh::build()
         abort();
     }
 
-#define BLOCK_SIZE 1024
+    std::cout << "\n\n\nTIMER time" << std::endl;
+
+    timer t;
+    t.start();
     dim3 block_count(md_objects.count / BLOCK_SIZE + 1);
     dim3 block_size(BLOCK_SIZE);
 
     assign_morton << <block_count, block_size >> > (*this);
     xcudaDeviceSynchronize();
     xcudaGetLastError();
+    t.stop("assign_morton");
 
-    // sort is stable (https://groups.google.com/g/cub-users/c/1iXn3sVMEuA)
-    radix_sort(md_objects.count, 
-        md_sortObject.keysIn, md_sortObject.keysOut, 
-        md_sortObject.indexIn, md_sortObject.indexOut);
-    xcudaDeviceSynchronize();
-    xcudaGetLastError();
+    //t.start();
+    //// sort is stable (https://groups.google.com/g/cub-users/c/1iXn3sVMEuA)
+    //radix_sort(md_objects.count, 
+    //    md_sortObject.keysIn, md_sortObject.keysOut, 
+    //    md_sortObject.indexIn, md_sortObject.indexOut);
+    //xcudaDeviceSynchronize();
+    //xcudaGetLastError();
+    //t.stop("radix_sort");
 
+    t.start();
+    md_sortObject.sort();
+    t.stop("radix_sort");
+
+    t.start();
     // construct leaf nodes
     ::leaf_nodes<<<block_count, block_size>>>(md_sortObject.indexOut, md_objects.count, *this);
-
     xcudaDeviceSynchronize();
     xcudaGetLastError();
+    t.stop("leaf_nodes");
 
+    t.start();
     // construct internal nodes
     ::internal_nodes<<<block_count, block_size>>>(md_sortObject.keysOut, md_sortObject.indexOut, md_objects.count, leaf_nodes, internal_nodes);
-
     xcudaDeviceSynchronize();
     xcudaGetLastError();
+    t.stop("internal_nodes");
 
+    t.start();
     // calculate bounding boxes by walking the hierarchy toward the root
     set_aabb<<<block_count, block_size>>>(*this);
-
     xcudaDeviceSynchronize();
     xcudaGetLastError();
-#undef BLOCK_SIZE
+    t.stop("set_aabb");
 }

@@ -50,8 +50,9 @@ struct bvh {
 
     void build();
 
-    bvh(unifiedObjects dObjects)  : md_objects(dObjects)
+    void malloc(unifiedObjects dObjects)
     {
+        md_objects = dObjects;
         md_sortObject.malloc(dObjects);
 
         // allocate BVH (n leaf nodes, n - 1 internal nodes)
@@ -59,7 +60,7 @@ struct bvh {
         xcudaMalloc(&internal_nodes, sizeof(bvh_node) * (md_objects.count - 1));
     }
 
-    ~bvh() 
+    void free() 
     {
         md_sortObject.free();
 
