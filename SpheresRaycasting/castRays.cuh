@@ -13,24 +13,16 @@
 
 #include "general.hpp"
 #include "unifiedObjects.cuh"
-#include "bvh.h"
 
-struct castRaysData
-{
-    int z = 0; // camera z coordinate
-    int width = 0;
-    int height = 0;
-    cudaSurfaceObject_t surfaceObject;
+#include "lbvhConcrete.cuh"
 
-    unifiedObjects data;
-};
-
-__device__ __forceinline__ bool rayHit(float3 aabbMin, float3 aabbMax, float3 o) 
+__device__ __forceinline__ bool rayHit(float4 aabbMin, float4 aabbMax, float3 o) 
 {
     return aabbMin.x < o.x && o.x < aabbMax.x &&
         aabbMin.y < o.y && o.y < aabbMax.y;
 }
 
+//__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
 __global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
@@ -53,35 +45,39 @@ __global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject
     closest.r = 1.f;
 
     // move throught the bhv tree
-    bvh_node* stack[64]; // local stack
-    int stack_ptr = 0;
-    stack[stack_ptr++] = &bvh.internal_nodes[0];
-    while (stack_ptr > 0) {
-        bvh_node* current = stack[--stack_ptr];
+    auto ptrs = bvh.get_device_repr();
 
-        if (!rayHit(current->min, current->max, o)) // no hit with the box, can skip this subtree
+    bvhNodeIdx stack[64]; // local stack
+    int stack_ptr = 0;
+    stack[stack_ptr++] = 0;
+    while (stack_ptr > 0) {
+
+        int indx = stack[--stack_ptr];
+        bvhNode current = ptrs.nodes[indx];
+
+        if (!rayHit(ptrs.aabbs[indx].lower, ptrs.aabbs[indx].upper, o)) // no hit with the box, can skip this subtree
             continue;
-        if (current->is_leaf()) 
+        if (current.left_idx == 0xFFFFFFFF) // is leaf
         {
-            int i = current->object_id;
+            int i = current.object_idx;
             // check if closer
             
             // check z (if closer by z coordinate)
-            if (!(bvh.md_objects.z[i] < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
+            if (!(ptrs.objects[i].z < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
                 continue;
 
             //check x and y
-            float dist2 = (bvh.md_objects.x[i] - o.x) * (bvh.md_objects.x[i] - o.x) + (bvh.md_objects.y[i] - o.y) * (bvh.md_objects.y[i] - o.y);
-            if (dist2 > bvh.md_objects.r[i] * bvh.md_objects.r[i])
+            float dist2 = (ptrs.objects[i].x - o.x) * (ptrs.objects[i].x - o.x) + (ptrs.objects[i].y - o.y) * (ptrs.objects[i].y - o.y);
+            if (dist2 > ptrs.objects[i].r * ptrs.objects[i].r)
                 continue;
-            closest = bvh.md_objects(i);
+            closest = ptrs.objects[i];
         }
         else 
         {
-            if (current->child_a) 
-                stack[stack_ptr++] = current->child_a;
-            if (current->child_b) 
-                stack[stack_ptr++] = current->child_b;
+            if (current.left_idx)
+                stack[stack_ptr++] = current.left_idx;
+            if (current.right_idx) 
+                stack[stack_ptr++] = current.right_idx;
         }
     }
     __syncthreads();

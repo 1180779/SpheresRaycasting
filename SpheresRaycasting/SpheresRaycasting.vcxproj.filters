@@ -25,26 +25,13 @@
     <Filter Include="source\other">
       <UniqueIdentifier>{8758e20f-9146-4bda-8d16-0bb6fc35adec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\cuda-blhv">
-      <UniqueIdentifier>{d49159bb-92f1-4975-856b-869a99531bc3}</UniqueIdentifier>
+    <Filter Include="lbvh">
+      <UniqueIdentifier>{069d104d-da2b-4f28-ab7c-fbc6a2c54dd0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main.cu">
       <Filter>source</Filter>
-    </CudaCompile>
-    <CudaCompile Include="lbvh.cu">
-      <Filter>source\dataStructures</Filter>
-    </CudaCompile>
-    <CudaCompile Include="unifiedObjects.cu" />
-    <CudaCompile Include="sortObject.cu">
-      <Filter>source\kernels</Filter>
-    </CudaCompile>
-    <CudaCompile Include="build.cu">
-      <Filter>source\cuda-blhv</Filter>
-    </CudaCompile>
-    <CudaCompile Include="cub_helper.cu">
-      <Filter>source\cuda-blhv</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,24 +98,35 @@
     <ClInclude Include="dataObject.hpp">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="lbvh.cuh">
-      <Filter>source\dataStructures</Filter>
-    </ClInclude>
-    <ClInclude Include="unifiedObjects.cuh" />
-    <ClInclude Include="sortObject.cuh">
-      <Filter>source\kernels</Filter>
-    </ClInclude>
     <ClInclude Include="timer.hpp">
       <Filter>source\other</Filter>
     </ClInclude>
-    <ClInclude Include="cub_helper.h">
-      <Filter>source\cuda-blhv</Filter>
+    <ClInclude Include="lbvh\morton_code.cuh">
+      <Filter>lbvh</Filter>
     </ClInclude>
-    <ClInclude Include="bvh.h">
-      <Filter>source\cuda-blhv</Filter>
+    <ClInclude Include="lbvh\predicator.cuh">
+      <Filter>lbvh</Filter>
     </ClInclude>
-    <ClInclude Include="cudaInline.h">
-      <Filter>source\cuda-blhv</Filter>
+    <ClInclude Include="lbvh\query.cuh">
+      <Filter>lbvh</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvh\utility.cuh">
+      <Filter>lbvh</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvh\aabb.cuh">
+      <Filter>lbvh</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvh\bvh.cuh">
+      <Filter>lbvh</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvh\lbvh.cuh">
+      <Filter>lbvh</Filter>
+    </ClInclude>
+    <ClInclude Include="unifiedObjects.cuh">
+      <Filter>source\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="lbvhConcrete.cuh">
+      <Filter>source\dataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,8 +177,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="cuda-blvh-license.txt">
-      <Filter>source\cuda-blhv</Filter>
+    <Text Include="lbvh\LICENSE.txt">
+      <Filter>lbvh</Filter>
     </Text>
   </ItemGroup>
 </Project>

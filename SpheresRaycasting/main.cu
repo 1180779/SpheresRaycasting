@@ -16,9 +16,11 @@
 #include "shader.hpp"
 #include "mat4.cuh"
 #include "dataObject.hpp"
-#include "bvh.h"
+
+#include "lbvhConcrete.cuh"
 
 #include "timer.hpp"
+#include <vector>
 
 void matTests() {
     glm::mat4 tGLM = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -51,24 +53,17 @@ int main(int, char**)
     disableCursor(render);
 
     buffer b = buffer();
-
-
+    
     dataObject data;
     data.generate(100, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
-   
+
+    bvh tree(data.m_objs.begin(), data.m_objs.end());
+
     transformData tData;
-    tData.data = data.md_unified;
-
     spheresDataForCallback = &tData;
-
-    dim3 blocksForSpheres = dim3(data.dCount() / BLOCK_SIZE + 1);
-    dim3 threadsForSpheres = dim3(BLOCK_SIZE);
 
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
-
-    bvh tree;
-    tree.malloc(data.md_unified);
 
     // Main loop
     while (!glfwWindowShouldClose(render.window))
@@ -102,19 +97,10 @@ int main(int, char**)
 
         //std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
 
-        timer t;
-        t.start();
-        tree.md_objects.findAABB();
-        t.stop("findAABB");
-
-        t.start();
-        tree.build();
-        t.stop("build bvh (all parts)");
-
         b.mapCudaResource();
 
         //tree.toHost();
-
+        timer t;
         t.start();
         castRaysKernel<<<blocks, threads>>>(tree, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject);
         xcudaDeviceSynchronize();
@@ -134,7 +120,6 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
-    tree.free();
-    data.free();
+    data.clear();
     return 0;
 }

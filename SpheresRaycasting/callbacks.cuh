@@ -9,8 +9,11 @@
 #include "general.hpp"
 #include "transformScene.cuh"
 #include "rendering.hpp"
+#include "lbvhConcrete.cuh"
 
 static transformData* spheresDataForCallback = nullptr;
+static bvh* spheresBvhForCallback = nullptr;
+
 static float lastX = 1280 / 2, lastY = 720 / 2;
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
@@ -36,7 +39,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     
-    dim3 blocks = dim3(spheresDataForCallback->data.count / BLOCK_SIZE + 1);
+    dim3 blocks = dim3(spheresDataForCallback->count / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE);
 
     glm::mat4 t = glm::mat4(1.0f);
@@ -46,7 +49,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     t = glm::translate(t, glm::vec3(-1920.0f / 2.0f, -1080.0f / 2.0f, 0.0f));
     spheresDataForCallback->t = t;
 
-    transformSceneKernel<<<blocks, threads>>>(*spheresDataForCallback);
+    transformSceneKernel<<<blocks, threads>>>(*spheresDataForCallback, *spheresBvhForCallback);
     xcudaDeviceSynchronize();
     xcudaGetLastError();
 }

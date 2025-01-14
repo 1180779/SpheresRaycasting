@@ -5,6 +5,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
+#include "lbvhConcrete.cuh"
 #include "unifiedObjects.cuh"
 #include "mat4.cuh"
 
@@ -12,22 +13,22 @@
 struct transformData 
 {
     mat4 t;
-
-    unifiedObjects data;
+    int count;
 };
 
-__global__ void transformSceneKernel(transformData data)
+__global__ void transformSceneKernel(transformData data, bvh bvh)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x; // object to transform
 
-    if (i >= data.data.count)
+    auto ptrs = bvh.get_device_repr();
+    if (i >= ptrs.num_objects)
         return;
-    vec4 r(data.data.x[i], data.data.y[i], data.data.z[i], data.data.w[i]);
+    vec4 r(ptrs.objects[i].x, ptrs.objects[i].y, ptrs.objects[i].z, ptrs.objects[i].w);
     r = data.t * r;
-    data.data.x[i] = r(0);
-    data.data.y[i] = r(1);
-    data.data.z[i] = r(2);
-    data.data.w[i] = r(3);
+    ptrs.objects[i].x = r(0);
+    ptrs.objects[i].y = r(1);
+    ptrs.objects[i].z = r(2);
+    ptrs.objects[i].w = r(3);
 }
 
 

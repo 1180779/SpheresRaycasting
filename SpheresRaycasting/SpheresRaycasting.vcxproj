@@ -61,9 +61,10 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>-lineinfo -G -rdc=true %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lineinfo -G -rdc=true --extended-lambda %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaLink />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -82,24 +83,19 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>-lineinfo -G -rdc=true %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lineinfo -G -rdc=true --extended-lambda %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaLink />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="build.cu" />
-    <CudaCompile Include="cub_helper.cu" />
-    <CudaCompile Include="lbvh.cu" />
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.cuh" />
-    <ClInclude Include="bvh.h" />
     <ClInclude Include="callbacks.cuh" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
-    <ClInclude Include="cub_helper.h" />
-    <ClInclude Include="cudaInline.h" />
     <ClInclude Include="general.hpp" />
     <ClInclude Include="imGuiUi.hpp" />
     <ClInclude Include="imGui\imconfig.h" />
@@ -111,10 +107,16 @@
     <ClInclude Include="imGui\imstb_rectpack.h" />
     <ClInclude Include="imGui\imstb_textedit.h" />
     <ClInclude Include="imGui\imstb_truetype.h" />
-    <ClInclude Include="lbvh.cuh" />
+    <ClInclude Include="lbvhConcrete.cuh" />
+    <ClInclude Include="lbvh\aabb.cuh" />
+    <ClInclude Include="lbvh\bvh.cuh" />
+    <ClInclude Include="lbvh\lbvh.cuh" />
+    <ClInclude Include="lbvh\morton_code.cuh" />
+    <ClInclude Include="lbvh\predicator.cuh" />
+    <ClInclude Include="lbvh\query.cuh" />
+    <ClInclude Include="lbvh\utility.cuh" />
     <ClInclude Include="mat4.cuh" />
     <ClInclude Include="rendering.hpp" />
-    <ClInclude Include="sortObject.cuh" />
     <ClInclude Include="timer.hpp" />
     <ClInclude Include="transformScene.cuh" />
     <ClInclude Include="shader.hpp" />
@@ -138,13 +140,9 @@
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="dataObject.cpp" />
     <ClCompile Include="timer.cpp" />
-    <CudaCompile Include="sortObject.cu" />
-    <CudaCompile Include="unifiedObjects.cu">
-      <FileType>CppCode</FileType>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="cuda-blvh-license.txt" />
+    <Text Include="lbvh\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
