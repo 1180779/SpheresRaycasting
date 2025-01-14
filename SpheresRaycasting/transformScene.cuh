@@ -16,11 +16,11 @@ struct transformData
     int count;
 };
 
-__global__ void transformSceneKernel(transformData data, bvh bvh)
+__global__ void transformSceneKernel(transformData data, const bvhDevice ptrs)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x; // object to transform
 
-    auto ptrs = bvh.get_device_repr();
+    //const auto ptrs = bvh.get_device_repr();
     if (i >= ptrs.num_objects)
         return;
     vec4 r(ptrs.objects[i].x, ptrs.objects[i].y, ptrs.objects[i].z, ptrs.objects[i].w);

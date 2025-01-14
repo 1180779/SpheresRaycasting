@@ -17,7 +17,7 @@
 #include "mat4.cuh"
 #include "dataObject.hpp"
 
-#include "lbvhConcrete.cuh"
+#include "lbvh/lbvh.cuh"
 
 #include "timer.hpp"
 #include <vector>
@@ -54,13 +54,25 @@ int main(int, char**)
 
     buffer b = buffer();
     
+    timer t;
+    t.start();
     dataObject data;
-    data.generate(100, 50, 50, -1920, 1920, -1080, 1080, 100, 200);
+    data.generate(10000, 50, 50, -1920, 1920, -1080, 1080, -4000, 4000);
+    t.stop("data.generate");
 
-    bvh tree(data.m_objs.begin(), data.m_objs.end());
+    t.start();
+    lbvh::bvh<float, unifiedObject, aabb_getter> bvh(data.m_objs.begin(), data.m_objs.end());
+    t.stop("first tree generation");
+    // get a set of device (raw) pointers to use it in device functions.
+    // Do not use this on host!
+    t.start();
+    const auto ptrs = bvh.get_device_repr();
+    t.stop("device repr");
 
     transformData tData;
+    tData.count = data.size();
     spheresDataForCallback = &tData;
+    spheresBvhForCallback = &ptrs;
 
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
@@ -99,10 +111,13 @@ int main(int, char**)
 
         b.mapCudaResource();
 
-        //tree.toHost();
-        timer t;
+        //timer t;
         t.start();
-        castRaysKernel<<<blocks, threads>>>(tree, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject);
+        bvh.construct();
+        t.stop("construct in loop");
+
+        t.start();
+        castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
         t.stop("castRaysKernel");

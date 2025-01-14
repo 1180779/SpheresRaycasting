@@ -21,6 +21,8 @@ struct aabb_getter
 };
 
 using bvh = lbvh::bvh<float, unifiedObject, aabb_getter>;
+using bvhDevice = lbvh::bvh_device<float, unifiedObject>;
+
 using bvhNode = lbvh::detail::node;
 using bvhAABB = lbvh::aabb<float>;
 using bvhNodeIdx = uint32_t;

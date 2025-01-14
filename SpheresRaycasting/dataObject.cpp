@@ -3,7 +3,12 @@
 #include "general.hpp"
 #include <iostream>
 
-void dataObject::generate(unsigned int count, float rMin, float rMax, float xMin, float xMax, float yMin, float yMax, float zMax, float zMin)
+void dataObject::generate(
+    unsigned int count, 
+    float rMin, float rMax, 
+    float xMin, float xMax, 
+    float yMin, float yMax, 
+    float zMin, float zMax)
 {
     m_objs.reserve(count);
     srand(static_cast <unsigned> (time(0)));
@@ -23,7 +28,7 @@ void dataObject::generate(unsigned int count, float rMin, float rMax, float xMin
         obj.color.z = rand() % 256;
 
         m_objs.push_back(obj);
-        std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
+        //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
     }
 }
 

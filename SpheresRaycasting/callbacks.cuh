@@ -12,7 +12,7 @@
 #include "lbvhConcrete.cuh"
 
 static transformData* spheresDataForCallback = nullptr;
-static bvh* spheresBvhForCallback = nullptr;
+static const bvhDevice* spheresBvhForCallback = nullptr;
 
 static float lastX = 1280 / 2, lastY = 720 / 2;
 

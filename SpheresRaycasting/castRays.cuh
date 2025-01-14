@@ -23,7 +23,7 @@ __device__ __forceinline__ bool rayHit(float4 aabbMin, float4 aabbMax, float3 o)
 }
 
 //__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
-__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
+__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
@@ -45,7 +45,7 @@ __global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject
     closest.r = 1.f;
 
     // move throught the bhv tree
-    auto ptrs = bvh.get_device_repr();
+    //auto ptrs = bvh.get_device_repr();
 
     bvhNodeIdx stack[64]; // local stack
     int stack_ptr = 0;

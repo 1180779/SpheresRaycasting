@@ -321,7 +321,7 @@ class bvh
 
         const auto aabb_whole = thrust::reduce(
             aabbs_.begin() + num_internal_nodes, aabbs_.end(), default_aabb,
-            [] __device__ (const aabb_type& lhs, const aabb_type& rhs) {
+            [] __device__ __host__ (const aabb_type& lhs, const aabb_type& rhs) {
                 return merge(lhs, rhs);
             });
 
@@ -355,7 +355,7 @@ class bvh
         {
             thrust::transform(morton.begin(), morton.end(), indices.begin(),
                 morton64.begin(),
-                [] __device__ (const unsigned int m, const unsigned int idx)
+                [] __device__ __host__ (const unsigned int m, const unsigned int idx)
                 {
                     unsigned long long int m64 = m;
                     m64 <<= 32;
@@ -376,7 +376,7 @@ class bvh
 
         thrust::transform(indices.begin(), indices.end(),
             this->nodes_.begin() + num_internal_nodes,
-            [] __device__ (const index_type idx)
+            [] __device__ __host__ (const index_type idx)
             {
                 node_type n;
                 n.parent_idx = 0xFFFFFFFF;
