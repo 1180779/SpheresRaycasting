@@ -5,6 +5,7 @@
 #include "unifiedObjects.cuh"
 #include <cuda_runtime.h>
 #include <vector>
+#include <thrust/device_vector.h>
 
 /* holds both device and host copies of the scene objects data */
 class dataObject 
@@ -22,8 +23,18 @@ public:
         float yMin, float yMax, 
         float zMin, float zMax);
 
+    void generateLights(
+        unsigned int count,
+        float rMin, float rMax,
+        float xMin, float xMax,
+        float yMin, float yMax,
+        float zMin, float zMax
+    );
     // mh - member host, md - memer device
     std::vector<unifiedObject> m_objs;
+    std::vector<light> m_lights;
+    dLights mh_lights;
+    dLights md_lights;
 };
 
 #endif
