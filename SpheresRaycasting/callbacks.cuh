@@ -1,19 +1,20 @@
 
-#ifndef U1180779_CALLBACKS_H
-#define U1180779_CALLBACKS_H
+#ifndef U1180779_CALLBACKS_CUH
+#define U1180779_CALLBACKS_CUH
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "general.hpp"
+#include "cudaWrappers.hpp"
 #include "transformScene.cuh"
 #include "rendering.hpp"
 #include "lbvhConcrete.cuh"
+#include "lights.hpp"
 
 static transformData* spheresDataForCallback = nullptr;
 static const bvhDevice* spheresBvhForCallback = nullptr;
-static dLights* lightsCallback = nullptr;
+static lights* lightsCallback = nullptr;
 
 static float lastX = 1280 / 2, lastY = 720 / 2;
 

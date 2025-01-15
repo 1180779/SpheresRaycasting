@@ -4,8 +4,8 @@
 #include <device_launch_parameters.h>
 
 #include "castRays.cuh"
-#include "buffer.cuh"
-#include "general.hpp"
+#include "buffer.hpp"
+#include "cudaWrappers.hpp"
 
 #include "callbacks.cuh"
 
@@ -57,8 +57,8 @@ int main(int, char**)
     timer t;
     t.start();
     dataObject data;
-    data.generate(10000, 50, 50, -1920, 1920, -1080, 1080, -4000, 4000);
-    data.generateLights(10, 100, 100, -1920, 1920, -1080, 1080, -4000, 4000);
+    data.generate(10000, range(50, 50), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000));
+    data.generateLights(10, range(100, 100), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000));
     t.stop("data.generate");
 
     t.start();

@@ -1,31 +1,34 @@
 
 #include "dataObject.hpp"
-#include "general.hpp"
+#include "cudaWrappers.hpp"
 #include <iostream>
 
 void dataObject::generate(
     unsigned int count, 
-    float rMin, float rMax, 
-    float xMin, float xMax, 
-    float yMin, float yMax, 
-    float zMin, float zMax)
+    range rR, range xR, 
+    range yR, range zR)
 {
+    randomValueGenerator rGen(rR);
+    randomValueGenerator xGen(xR);
+    randomValueGenerator yGen(yR);
+    randomValueGenerator zGen(zR);
+    randomValueGenerator colorGen(0.0f, 1.0f);
+
     m_objs.reserve(count);
-    srand(static_cast <unsigned> (time(0)));
     for (int i = 0; i < count; ++i) {
         // TODO: check that spheres do not overlap
         unifiedObject obj;
-        obj.x = xMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (xMax - xMin)));
-        obj.y = yMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (yMax - yMin)));
-        obj.z = zMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (zMax - zMin)));
+        obj.x = xGen();
+        obj.y = yGen();
+        obj.z = zGen();
         obj.w = 1.0f;
-        obj.r = rMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (rMax - rMin)));
+        obj.r = rGen();
         
         obj.type = types::sphere;
 
-        obj.color.x = static_cast<float>(rand() % 256) / 255.0f;
-        obj.color.y = static_cast<float>(rand() % 256) / 255.0f;
-        obj.color.z = static_cast<float>(rand() % 256) / 255.0f;
+        obj.color.x = colorGen();
+        obj.color.y = colorGen();
+        obj.color.z = colorGen();
 
         obj.ka = 0.3f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5f - 0.3f)));
         obj.ks = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f - 0.7f)));;
@@ -39,20 +42,24 @@ void dataObject::generate(
 
 void dataObject::generateLights(
     unsigned int count,
-    float rMin, float rMax,
-    float xMin, float xMax,
-    float yMin, float yMax,
-    float zMin, float zMax)
+    range rR, range xR,
+    range yR, range zR)
 {
+    randomValueGenerator rGen(rR);
+    randomValueGenerator xGen(xR);
+    randomValueGenerator yGen(yR);
+    randomValueGenerator zGen(zR);
+    randomValueGenerator colorGen(255.0f / 2.0f);
+
     mh_lights.hMalloc(count);
     for (int i = 0; i < count; ++i) {
         // TODO: check that spheres do not overlap
         unifiedObject obj;
-        obj.x = xMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (xMax - xMin)));
-        obj.y = yMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (yMax - yMin)));
-        obj.z = zMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (zMax - zMin)));
+        obj.x = xGen();
+        obj.y = yGen();
+        obj.z = zGen();
         obj.w = 1.0f;
-        obj.r = rMin + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (rMax - rMin)));
+        obj.r = rGen();
 
         obj.type = types::lightSource;
 

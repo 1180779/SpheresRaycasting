@@ -2,10 +2,14 @@
 #ifndef U1180779_DATA_OBJECT_H
 #define U1180779_DATA_OBJECT_H
 
-#include "unifiedObjects.cuh"
 #include <cuda_runtime.h>
-#include <vector>
 #include <thrust/device_vector.h>
+
+#include <vector>
+
+#include "randomValueGenerator.hpp"
+#include "unifiedObjects.hpp"
+#include "lights.hpp"
 
 /* holds both device and host copies of the scene objects data */
 class dataObject 
@@ -18,25 +22,21 @@ public:
     /* generate spheres data */
     void generate(
         unsigned int count, 
-        float rMin, float rMax, 
-        float xMin, float xMax, 
-        float yMin, float yMax, 
-        float zMin, float zMax);
+        range rR, range xR,
+        range yR, range zR);
 
     void generateLights(
         unsigned int count,
-        float rMin, float rMax,
-        float xMin, float xMax,
-        float yMin, float yMax,
-        float zMin, float zMax
+        range rR, range xR,
+        range yR, range zR
     );
 
     void freeLights();
     
     // mh - member host, md - memer device
     std::vector<unifiedObject> m_objs;
-    dLights mh_lights;
-    dLights md_lights;
+    lights mh_lights;
+    lights md_lights;
 
 };
 

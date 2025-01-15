@@ -1,25 +1,26 @@
 
-#ifndef U1180779_CAST_RAYS_H
-#define U1180779_CAST_RAYS_H
+#ifndef U1180779_CAST_RAYS_CUH
+#define U1180779_CAST_RAYS_CUH
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 #include <glad/glad.h>
 #include <cuda_gl_interop.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 #include <thrust/sequence.h>
 #include <thrust/sort.h>
 #include <thrust/device_ptr.h>
 
-#include "general.hpp"
-#include "unifiedObjects.cuh"
-
+#include "cudaWrappers.hpp"
+#include "unifiedObjects.hpp"
+#include "lights.hpp"
 #include "lbvhConcrete.cuh"
+#include "rays.cuh"
 
-__device__ __forceinline__ float3 operator-(float3 a, float3 b)
-{
-    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
+/* inline floatN Operations */
+/* ------------------------------------------------------------------------------- */
+
+/* operators */
 
 __device__ __forceinline__ float3 operator+(float3 a, float3 b)
 {
@@ -34,6 +35,11 @@ __device__ __forceinline__ float3 operator+(float3 v, float f)
 __device__ __forceinline__ float3 operator+(float f, float3 v)
 {
     return v + f;
+}
+
+__device__ __forceinline__ float3 operator-(float3 a, float3 b)
+{
+    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
 __device__ __forceinline__ float3 operator*(float f, float3 v)
@@ -56,6 +62,8 @@ __device__ __forceinline__ float3 operator/(float3 v, float f)
     return make_float3(v.x / f, v.y / f, v.z / f);
 }
 
+/* vector math */
+
 __device__ __forceinline__ float dot(float3 a, float3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -77,15 +85,10 @@ __device__ __forceinline__ float3 max(float3 a, float f)
     return make_float3(fmaxf(a.x, f), fmaxf(a.y, f), fmaxf(a.z, f));
 }
 
-__device__ __forceinline__ bool rayHit(float4 aabbMin, float4 aabbMax, float3 o) 
-{
-    return aabbMin.x < o.x && o.x < aabbMax.x &&
-        aabbMin.y < o.y && o.y < aabbMax.y && 
-        o.z < aabbMax.z; 
-}
+/* kernel to cast rays */
+/* ------------------------------------------------------------------------------- */
 
-//__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
-__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, dLights lights)
+__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y

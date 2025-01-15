@@ -1,6 +1,6 @@
 
-#ifndef U1180779_GENERAL_H
-#define U1180779_GENERAL_H
+#ifndef U1180779_CUDA_WRAPPERS_H
+#define U1180779_CUDA_WRAPPERS_H
 
 #include <cuda_runtime.h>
 #include <stdio.h>

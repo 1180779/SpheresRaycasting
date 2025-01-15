@@ -1,32 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{b55a3257-484c-493d-bd62-dd5fa5f7f715}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source">
       <UniqueIdentifier>{782cd74f-5bf9-4814-9c49-c68132837fe5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\global">
-      <UniqueIdentifier>{7856eace-5111-4edc-a261-476c4142a744}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\camera">
-      <UniqueIdentifier>{5520be00-c596-44bb-9e89-a3fe232fa52d}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\rendering">
       <UniqueIdentifier>{e8a3d129-833e-4b36-a1f4-aeca2bd0e872}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\kernels">
-      <UniqueIdentifier>{5250241a-de60-4710-b88b-fcc4df2c363c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\dataStructures">
-      <UniqueIdentifier>{0f9303db-cdd4-41ab-a008-51ec2e034da6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\other">
+    <Filter Include="source\utils">
       <UniqueIdentifier>{8758e20f-9146-4bda-8d16-0bb6fc35adec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lbvh">
+    <Filter Include="source\cuda">
+      <UniqueIdentifier>{5250241a-de60-4710-b88b-fcc4df2c363c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\cuda\dataStructures">
+      <UniqueIdentifier>{0f9303db-cdd4-41ab-a008-51ec2e034da6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\cuda\camera">
+      <UniqueIdentifier>{5520be00-c596-44bb-9e89-a3fe232fa52d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\rendering\shaders">
+      <UniqueIdentifier>{7856eace-5111-4edc-a261-476c4142a744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies">
+      <UniqueIdentifier>{54730dbf-1fae-40a3-aa3f-c42f75f6351e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\lbvh">
       <UniqueIdentifier>{069d104d-da2b-4f28-ab7c-fbc6a2c54dd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\imgui">
+      <UniqueIdentifier>{b55a3257-484c-493d-bd62-dd5fa5f7f715}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\openGL">
+      <UniqueIdentifier>{170eb01d-4691-4e13-b2c4-a01459db7029}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,37 +42,37 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imGui\imstb_truetype.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imconfig.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imgui.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imgui_impl_glfw.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imgui_impl_opengl3.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imgui_impl_opengl3_loader.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imgui_internal.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imGui\imstb_textedit.h">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="shader.hpp">
-      <Filter>source\global</Filter>
+      <Filter>source\rendering\shaders</Filter>
     </ClInclude>
     <ClInclude Include="camera.hpp">
-      <Filter>source\camera</Filter>
+      <Filter>source\cuda\camera</Filter>
     </ClInclude>
     <ClInclude Include="rendering.hpp">
       <Filter>source\rendering</Filter>
@@ -74,85 +80,91 @@
     <ClInclude Include="imGuiUi.hpp">
       <Filter>source\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="buffer.cuh">
-      <Filter>source</Filter>
-    </ClInclude>
     <ClInclude Include="mat4.cuh">
-      <Filter>source\kernels</Filter>
+      <Filter>source\cuda</Filter>
     </ClInclude>
     <ClInclude Include="shaderSource.hpp">
-      <Filter>source\global</Filter>
+      <Filter>source\rendering\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="general.hpp">
-      <Filter>source\kernels</Filter>
+    <ClInclude Include="cudaWrappers.hpp">
+      <Filter>source\cuda</Filter>
     </ClInclude>
     <ClInclude Include="dataObject.hpp">
-      <Filter>source\dataStructures</Filter>
+      <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
     <ClInclude Include="timer.hpp">
-      <Filter>source\other</Filter>
+      <Filter>source\utils</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\morton_code.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\predicator.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\query.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\utility.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\aabb.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\bvh.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
     <ClInclude Include="lbvh\lbvh.cuh">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
     </ClInclude>
-    <ClInclude Include="unifiedObjects.cuh">
-      <Filter>source\dataStructures</Filter>
+    <ClInclude Include="unifiedObjects.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
     <ClInclude Include="castRays.cuh">
-      <Filter>source\kernels</Filter>
+      <Filter>source\cuda</Filter>
     </ClInclude>
     <ClInclude Include="callbacks.cuh">
-      <Filter>source\kernels</Filter>
+      <Filter>source\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="rays.cuh">
+      <Filter>source\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer.hpp">
+      <Filter>source\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="lights.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="randomValueGenerator.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_impl_glfw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_impl_opengl3.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imGui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>source\global</Filter>
+      <Filter>dependencies\imgui</Filter>
     </ClCompile>
     <ClCompile Include="shader.cpp">
-      <Filter>source\global</Filter>
+      <Filter>source\rendering\shaders</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp">
-      <Filter>source\camera</Filter>
+      <Filter>source\cuda\camera</Filter>
     </ClCompile>
     <ClCompile Include="rendering.cpp">
       <Filter>source\rendering</Filter>
@@ -161,18 +173,24 @@
       <Filter>source\rendering</Filter>
     </ClCompile>
     <ClCompile Include="shaderSource.cpp">
-      <Filter>source\global</Filter>
+      <Filter>source\rendering\shaders</Filter>
     </ClCompile>
     <ClCompile Include="dataObject.cpp">
-      <Filter>source\dataStructures</Filter>
+      <Filter>source\cuda\dataStructures</Filter>
     </ClCompile>
     <ClCompile Include="timer.cpp">
-      <Filter>source\other</Filter>
+      <Filter>source\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>dependencies\openGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="lbvh\LICENSE.txt">
-      <Filter>lbvh</Filter>
+      <Filter>dependencies\lbvh</Filter>
+    </Text>
+    <Text Include="imGui\LICENSE.txt">
+      <Filter>dependencies\imgui</Filter>
     </Text>
   </ItemGroup>
 </Project>

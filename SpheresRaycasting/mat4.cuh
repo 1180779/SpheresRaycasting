@@ -1,6 +1,6 @@
 
-#ifndef U1180779_MAT4_H
-#define U1180779_MAT4_H
+#ifndef U1180779_MAT4_CUH
+#define U1180779_MAT4_CUH
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>

@@ -1,8 +1,9 @@
 
-#pragma once
+#ifndef U1180779_LBVH_CONCRETE_CUH
+#define U1180779_LBVH_CONCRETE_CUH
 
 #include "lbvh/lbvh.cuh"
-#include "unifiedObjects.cuh"
+#include "unifiedObjects.hpp"
 
 struct aabb_getter
 {
@@ -26,3 +27,5 @@ using bvhDevice = lbvh::bvh_device<float, unifiedObject>;
 using bvhNode = lbvh::detail::node;
 using bvhAABB = lbvh::aabb<float>;
 using bvhNodeIdx = uint32_t;
+
+#endif

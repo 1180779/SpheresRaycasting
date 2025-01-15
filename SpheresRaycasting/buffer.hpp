@@ -7,7 +7,7 @@
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 
-#include "general.hpp"
+#include "cudaWrappers.hpp"
 #include "shader.hpp"
 #include "shaderSource.hpp"
 

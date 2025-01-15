@@ -6,9 +6,9 @@
 #include <device_launch_parameters.h>
 
 #include "lbvhConcrete.cuh"
-#include "unifiedObjects.cuh"
+#include "unifiedObjects.hpp"
 #include "mat4.cuh"
-
+#include "lights.hpp"
 
 struct transformData 
 {
@@ -16,7 +16,7 @@ struct transformData
     int count;
 };
 
-__global__ void transformSceneKernel(transformData data, const bvhDevice ptrs, dLights lights)
+__global__ void transformSceneKernel(transformData data, const bvhDevice ptrs, lights lights)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x; // object to transform
 

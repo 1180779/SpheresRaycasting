@@ -92,11 +92,11 @@
     <CudaCompile Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="buffer.cuh" />
+    <ClInclude Include="buffer.hpp" />
     <ClInclude Include="callbacks.cuh" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
-    <ClInclude Include="general.hpp" />
+    <ClInclude Include="cudaWrappers.hpp" />
     <ClInclude Include="imGuiUi.hpp" />
     <ClInclude Include="imGui\imconfig.h" />
     <ClInclude Include="imGui\imgui.h" />
@@ -114,13 +114,16 @@
     <ClInclude Include="lbvh\predicator.cuh" />
     <ClInclude Include="lbvh\query.cuh" />
     <ClInclude Include="lbvh\utility.cuh" />
+    <ClInclude Include="lights.hpp" />
     <ClInclude Include="mat4.cuh" />
+    <ClInclude Include="randomValueGenerator.hpp" />
+    <ClInclude Include="rays.cuh" />
     <ClInclude Include="rendering.hpp" />
     <ClInclude Include="timer.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="dataObject.hpp" />
-    <ClInclude Include="unifiedObjects.cuh" />
+    <ClInclude Include="unifiedObjects.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
@@ -140,6 +143,7 @@
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="imGui\LICENSE.txt" />
     <Text Include="lbvh\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
