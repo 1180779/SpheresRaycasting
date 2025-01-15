@@ -58,6 +58,7 @@ int main(int, char**)
     t.start();
     dataObject data;
     data.generate(10000, 50, 50, -1920, 1920, -1080, 1080, -4000, 4000);
+    data.generateLights(10, 100, 100, -1920, 1920, -1080, 1080, -4000, 4000);
     t.stop("data.generate");
 
     t.start();
@@ -73,6 +74,7 @@ int main(int, char**)
     tData.count = data.size();
     spheresDataForCallback = &tData;
     spheresBvhForCallback = &ptrs;
+    lightsCallback = &data.md_lights;
 
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
@@ -117,7 +119,7 @@ int main(int, char**)
         t.stop("construct in loop");
 
         t.start();
-        castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject);
+        castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
         t.stop("castRaysKernel");
@@ -135,6 +137,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
+    data.freeLights();
     data.clear();
     return 0;
 }

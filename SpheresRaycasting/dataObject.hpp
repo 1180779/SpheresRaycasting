@@ -30,11 +30,14 @@ public:
         float yMin, float yMax,
         float zMin, float zMax
     );
+
+    void freeLights();
+    
     // mh - member host, md - memer device
     std::vector<unifiedObject> m_objs;
-    std::vector<light> m_lights;
     dLights mh_lights;
     dLights md_lights;
+
 };
 
 #endif

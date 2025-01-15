@@ -23,9 +23,14 @@ void dataObject::generate(
         
         obj.type = types::sphere;
 
-        obj.color.x = rand() % 256;
-        obj.color.y = rand() % 256;
-        obj.color.z = rand() % 256;
+        obj.color.x = static_cast<float>(rand() % 256) / 255.0f;
+        obj.color.y = static_cast<float>(rand() % 256) / 255.0f;
+        obj.color.z = static_cast<float>(rand() % 256) / 255.0f;
+
+        obj.ka = 0.3f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5f - 0.3f)));
+        obj.ks = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f - 0.7f)));;
+        obj.kd = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.7f - 0.5f)));
+        obj.alpha = 2.0f;
 
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
@@ -39,7 +44,6 @@ void dataObject::generateLights(
     float yMin, float yMax,
     float zMin, float zMax)
 {
-    m_lights.reserve(count);
     mh_lights.hMalloc(count);
     for (int i = 0; i < count; ++i) {
         // TODO: check that spheres do not overlap
@@ -52,24 +56,31 @@ void dataObject::generateLights(
 
         obj.type = types::lightSource;
 
-        obj.color.x = rand() % 256;
-        obj.color.y = rand() % 256;
-        obj.color.z = rand() % 256;
+        // not used yet
+        obj.color.x = 255.0f / 2.0f;
+        obj.color.y = 255.0f / 2.0f;
+        obj.color.z = 255.0f / 2.0f;
 
-        m_lights.push_back(obj.light());
+        // save generated data
         mh_lights.x[i] = obj.x;
         mh_lights.y[i] = obj.y;
         mh_lights.z[i] = obj.z;
         mh_lights.w[i] = obj.w;
-        mh_lights.cX[i] = obj.color.x;
-        mh_lights.cY[i] = obj.color.y;
-        mh_lights.cZ[i] = obj.color.z;
+
+        mh_lights.is[i] = 0.2f;
+        mh_lights.id[i] = 0.2f;
 
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
     }
     md_lights.dMalloc(count);
     md_lights.copyToDeviceFromHost(mh_lights);
+}
+
+void dataObject::freeLights()
+{
+    md_lights.dFree();
+    mh_lights.hFree();
 }
 
 

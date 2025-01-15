@@ -16,14 +16,76 @@
 
 #include "lbvhConcrete.cuh"
 
+__device__ __forceinline__ float3 operator-(float3 a, float3 b)
+{
+    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+__device__ __forceinline__ float3 operator+(float3 a, float3 b)
+{
+    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+__device__ __forceinline__ float3 operator+(float3 v, float f)
+{
+    return make_float3(v.x + f, v.y + f, v.z + f);
+}
+
+__device__ __forceinline__ float3 operator+(float f, float3 v)
+{
+    return v + f;
+}
+
+__device__ __forceinline__ float3 operator*(float f, float3 v)
+{
+    return make_float3(f * v.x, f * v.y, f * v.z);
+}
+
+__device__ __forceinline__ float3 operator*(float3 v, float f)
+{
+    return f * v;
+}
+
+__device__ __forceinline__ float3 operator*(float3 a, float3 b)
+{
+    return make_float3(a.x * b.x, a.y * b.y, a.z * b.z);
+}
+
+__device__ __forceinline__ float3 operator/(float3 v, float f)
+{
+    return make_float3(v.x / f, v.y / f, v.z / f);
+}
+
+__device__ __forceinline__ float dot(float3 a, float3 b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+__device__ __forceinline__ float3 normalize(float3 v)
+{
+    float l = sqrt(dot(v, v));
+    return v / l;
+}
+
+__device__ __forceinline__ float3 min(float3 a, float f)
+{
+    return make_float3(fminf(a.x, f), fminf(a.y, f), fminf(a.z, f));
+}
+
+__device__ __forceinline__ float3 max(float3 a, float f)
+{
+    return make_float3(fmaxf(a.x, f), fmaxf(a.y, f), fmaxf(a.z, f));
+}
+
 __device__ __forceinline__ bool rayHit(float4 aabbMin, float4 aabbMax, float3 o) 
 {
     return aabbMin.x < o.x && o.x < aabbMax.x &&
-        aabbMin.y < o.y && o.y < aabbMax.y;
+        aabbMin.y < o.y && o.y < aabbMax.y && 
+        o.z < aabbMax.z; 
 }
 
 //__global__ void castRaysKernel(bvh bvh, int width, int height, cudaSurfaceObject_t surfaceObject)
-__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject)
+__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, dLights lights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
@@ -32,10 +94,15 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         return;
 
     // ray origin
-    float3 o;
-    o.x = x;
-    o.y = y;
-    o.z = 0;
+    float3 O;
+    O.x = x;
+    O.y = y;
+    O.z = 0;
+
+    float3 D;
+    D.x = 0;
+    D.y = 0;
+    D.z = 1.0f;
 
     // find closes sphere (or light) by z coordinate
     unifiedObject closest;
@@ -55,7 +122,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         int indx = stack[--stack_ptr];
         bvhNode current = ptrs.nodes[indx];
 
-        if (!rayHit(ptrs.aabbs[indx].lower, ptrs.aabbs[indx].upper, o)) // no hit with the box, can skip this subtree
+        if (!rayHit(ptrs.aabbs[indx].lower, ptrs.aabbs[indx].upper, O)) // no hit with the box, can skip this subtree
             continue;
         if (current.left_idx == 0xFFFFFFFF) // is leaf
         {
@@ -67,7 +134,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
                 continue;
 
             //check x and y
-            float dist2 = (ptrs.objects[i].x - o.x) * (ptrs.objects[i].x - o.x) + (ptrs.objects[i].y - o.y) * (ptrs.objects[i].y - o.y);
+            float dist2 = (ptrs.objects[i].x - O.x) * (ptrs.objects[i].x - O.x) + (ptrs.objects[i].y - O.y) * (ptrs.objects[i].y - O.y);
             if (dist2 > ptrs.objects[i].r * ptrs.objects[i].r)
                 continue;
             closest = ptrs.objects[i];
@@ -94,42 +161,63 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         return;
     }
 
+    if (closest.type == types::lightSource) {
+        uchar4 writeData;
+        writeData.x = closest.color.x;
+        writeData.y = closest.color.y;
+        writeData.z = closest.color.z;
+        writeData.w = 255;
+        surf2Dwrite(writeData, surfaceObject, 4 * x, y);
+        return;
+    }
+
+    //if (closest.type == types::sphere) {
+    //    uchar4 writeData;
+    //    writeData.x = closest.color.x;
+    //    writeData.y = closest.color.y;
+    //    writeData.z = closest.color.z;
+    //    writeData.w = 255;
+    //    surf2Dwrite(writeData, surfaceObject, 4 * x, y);
+    //    return;
+    //}
+
+
     // get point on the sphere
-    //float3 p;
-    //p.x = o.x;
-    //p.y = o.y;
+    float3 C = make_float3(closest.x, closest.y, closest.z);
+    //float a = 1.0f; 
+    float b = 2 * dot(D, O - C);
+    float c = dot(O - C, O - C) - closest.r * closest.r;
 
-    //float x2 = x - closest.x;
-    //x2 *= x2;
-    //float y2 = y - closest.y;
-    //y2 *= y2;
-    //float z2 = o.z - closest.z;
-    //
-    //// float a = 1.f;
-    //float b = 2 * z2;
-    //float c = z2 * z2 + x2 + y2 - closest.r * closest.r;
-    //
-    //float delta = (b * b - 4 * c) / 2;
-    //float i = (-b + sqrt(delta)) / 2; // +- sqrt(delta)
+    float delta = b * b - 4 * c;
+    delta = sqrt(delta);
+    float i1 = ((-b - delta) / 2.0f);
+    float i2 = ((-b + delta) / 2.0f);
+    float i = i1 < i2 ? i1 : i2;
 
-    //p.z = o.z + i;
+    float3 P = O + i * D;
+    float3 N = normalize(P - C);
+    float3 V = normalize(P - O);
 
-    // get normal vector
-    //float3 N;
-    //N.x = p.x - closest.x;
-    //N.y = p.y - closest.y;
-    //N.z = p.z - closest.z;
 
-    //float t = (float)norm3d(N.x, N.y, N.z);
-    //N.x /= t;
-    //N.y /= t;
-    //N.z /= t;
-    
+    // calculate light
+    // i_a = 0.5
+    float3 color = 0.5 * closest.ka * closest.color;
+    for (int i = 0; i < lights.count; ++i) {
+        __syncthreads();
+
+        float3 L = normalize(C - make_float3(lights.x[i], lights.y[i], lights.z[i]));
+        float3 R = normalize(2 * (dot(L, N)) * N - L);
+
+        color = color + 
+            lights.id[i] * closest.kd * closest.color * fmaxf(0.0f, dot(L, N)) +
+            lights.is[i] * closest.ks * closest.color * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
+    }
+    color = min(color, 1.0f);
 
     uchar4 writeData;
-    writeData.x = closest.color.x;
-    writeData.y = closest.color.y;
-    writeData.z = closest.color.z;
+    writeData.x = (unsigned char)(color.x * 255.0f);
+    writeData.y = (unsigned char)(color.y * 255.0f);
+    writeData.z = (unsigned char)(color.z * 255.0f);
     writeData.w = 255;
     surf2Dwrite(writeData, surfaceObject, 4 * x, y);
 }

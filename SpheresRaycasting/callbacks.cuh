@@ -13,6 +13,7 @@
 
 static transformData* spheresDataForCallback = nullptr;
 static const bvhDevice* spheresBvhForCallback = nullptr;
+static dLights* lightsCallback = nullptr;
 
 static float lastX = 1280 / 2, lastY = 720 / 2;
 
@@ -49,7 +50,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     t = glm::translate(t, glm::vec3(-1920.0f / 2.0f, -1080.0f / 2.0f, 0.0f));
     spheresDataForCallback->t = t;
 
-    transformSceneKernel<<<blocks, threads>>>(*spheresDataForCallback, *spheresBvhForCallback);
+    transformSceneKernel<<<blocks, threads>>>(*spheresDataForCallback, *spheresBvhForCallback, *lightsCallback);
     xcudaDeviceSynchronize();
     xcudaGetLastError();
 }

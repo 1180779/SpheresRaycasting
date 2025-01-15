@@ -22,7 +22,7 @@ struct light
     float w;
 
 
-    glm::ivec3 color;
+    float3 color;
 };
 
 struct unifiedObject
@@ -34,8 +34,9 @@ struct unifiedObject
     float r;
 
     types type;
-    glm::ivec3 color;
+    float3 color;
 
+    float ka;
     float ks;
     float kd;
     float alpha;
@@ -47,6 +48,7 @@ struct unifiedObject
         l.z = z;
         l.w = w;
         l.color = color;
+        return l;
     }
 };
 
@@ -59,9 +61,8 @@ struct dLights
     float* z;
     float* w;
 
-    int* cX; // color x
-    int* cY; // color y
-    int* cZ; // color z
+    float* is; // specular light intensity ([0, 1])
+    float* id; // diffuse light intensity ([0, 1])
 
     //light operator()(int i) 
     //{
@@ -83,9 +84,8 @@ struct dLights
         z = new float[count];
         w = new float[count];
         
-        cX = new int[count];
-        cY = new int[count];
-        cZ = new int[count];
+        is = new float[count];
+        id = new float[count];
     }
 
     void hFree() 
@@ -95,9 +95,8 @@ struct dLights
         delete[] z;
         delete[] w;
 
-        delete[] cX;
-        delete[] cY;
-        delete[] cZ;
+        delete[] is;
+        delete[] id;
     }
 
     void dMalloc(unsigned int count) 
@@ -108,9 +107,8 @@ struct dLights
         xcudaMalloc(&z, sizeof(float) * count);
         xcudaMalloc(&w, sizeof(float) * count);
         
-        xcudaMalloc(&cX, sizeof(int) * count);
-        xcudaMalloc(&cY, sizeof(int) * count);
-        xcudaMalloc(&cZ, sizeof(int) * count);
+        xcudaMalloc(&is, sizeof(float) * count);
+        xcudaMalloc(&id, sizeof(float) * count);
     }
     
     void dFree() 
@@ -120,21 +118,20 @@ struct dLights
         xcudaFree(z);
         xcudaFree(w);
 
-        xcudaFree(cX);
-        xcudaFree(cY);
-        xcudaFree(cZ);
+        xcudaFree(is);
+        xcudaFree(id);
     }
 
     void copyToDeviceFromHost(const dLights& other) 
     {
+        count = other.count;
         xcudaMemcpy(x, other.x, sizeof(float) * count, cudaMemcpyHostToDevice);
         xcudaMemcpy(y, other.y, sizeof(float) * count, cudaMemcpyHostToDevice);
         xcudaMemcpy(z, other.z, sizeof(float) * count, cudaMemcpyHostToDevice);
         xcudaMemcpy(w, other.w, sizeof(float) * count, cudaMemcpyHostToDevice);
         
-        xcudaMemcpy(cX, other.cX, sizeof(int) * count, cudaMemcpyHostToDevice);
-        xcudaMemcpy(cY, other.cY, sizeof(int) * count, cudaMemcpyHostToDevice);
-        xcudaMemcpy(cZ, other.cZ, sizeof(int) * count, cudaMemcpyHostToDevice);
+        xcudaMemcpy(is, other.is, sizeof(float) * count, cudaMemcpyHostToDevice);
+        xcudaMemcpy(id, other.id, sizeof(float) * count, cudaMemcpyHostToDevice);
     }
 };
 

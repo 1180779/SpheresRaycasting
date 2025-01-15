@@ -77,16 +77,7 @@
     <ClInclude Include="buffer.cuh">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="castRays.cuh">
-      <Filter>source\kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="transformScene.cuh">
-      <Filter>source\kernels</Filter>
-    </ClInclude>
     <ClInclude Include="mat4.cuh">
-      <Filter>source\kernels</Filter>
-    </ClInclude>
-    <ClInclude Include="callbacks.cuh">
       <Filter>source\kernels</Filter>
     </ClInclude>
     <ClInclude Include="shaderSource.hpp">
@@ -125,8 +116,11 @@
     <ClInclude Include="unifiedObjects.cuh">
       <Filter>source\dataStructures</Filter>
     </ClInclude>
-    <ClInclude Include="lbvhConcrete.cuh">
-      <Filter>source\dataStructures</Filter>
+    <ClInclude Include="castRays.cuh">
+      <Filter>source\kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="callbacks.cuh">
+      <Filter>source\kernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
