@@ -8,7 +8,9 @@
 /* set of cuda wrapper macros with the motto succeed or die
  names are the same as cuda functions, but being with 'x' */
 
-#define BLOCK_SIZE 16
+
+#define BLOCK_SIZE1D 256
+#define BLOCK_SIZE2D 16
 
 #define xcuda(operation) do { \
             cudaError_t status = operation; \

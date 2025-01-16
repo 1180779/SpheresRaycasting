@@ -9,7 +9,7 @@
 
 #include "randomValueGenerator.hpp"
 #include "materialGenerator.hpp"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 #include "lights.hpp"
 
 /* holds both device and host copies of the scene objects data */
@@ -30,7 +30,8 @@ public:
     void generateLights(
         unsigned int count,
         range rR, range xR,
-        range yR, range zR
+        range yR, range zR,
+        range isR, range idR
     );
 
     void freeLights();

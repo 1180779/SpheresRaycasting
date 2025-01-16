@@ -30,6 +30,8 @@ public:
         selfLuminous
     };
 
+    static const int typeCount;
+
     static const char* const typeString[];
 
     materialGenerator(type t) : kaGen(kaRange(t)), kdGen(kdRange(t)), ksGen(ksRange(t)), alphaGen(alphaRange(t)) { }

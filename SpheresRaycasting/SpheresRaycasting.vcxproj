@@ -129,7 +129,7 @@
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="dataObject.hpp" />
     <ClInclude Include="transformScene.hpp" />
-    <ClInclude Include="unifiedObjects.hpp" />
+    <ClInclude Include="unifiedObject.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
@@ -146,12 +146,14 @@
     <ClCompile Include="imGui\imgui_widgets.cpp" />
     <ClCompile Include="materialGenerator.cpp" />
     <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="sceneConfig.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="dataObject.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="config.txt" />
     <Text Include="imGui\LICENSE.txt" />
     <Text Include="lbvh\LICENSE.txt" />
   </ItemGroup>

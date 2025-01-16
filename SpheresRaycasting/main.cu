@@ -27,7 +27,7 @@ int main(int, char**)
     xcudaSetDevice(0);
 
     /* const settings loop */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
     sceneConfig config;
     config.sCount = 1000;
     config.sXR = range(0, 1920);
@@ -40,6 +40,11 @@ int main(int, char**)
     config.lYR = range(0, 1080);
     config.lZR = range(2000, 4000);
     config.lRR = range(20, 20);
+
+    config.isR = range(0.2f, 0.2f);
+    config.idR = range(0.2f, 0.2f);
+
+    config.matType = materialGenerator::type::matte;
 
     bool start = false;
     while (!glfwWindowShouldClose(render.window) && !start)
@@ -65,18 +70,23 @@ int main(int, char**)
         render.swapBuffers();
     }
 
+    /* if window is closed exit immediately */
+    if (glfwWindowShouldClose(render.window))
+        return 0;
+
     /* preparation (data creation etc.) */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
 
     /* create openGL texture for CUDA */
     buffer b = buffer();
+
 
     /* generate data (spheres + lights) */
     timer t;
     t.start();
     dataObject data;
     data.generate(config.sCount, config.sRR, config.sXR, config.sYR, config.sZR, config.matType);
-    data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR);
+    data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR, config.isR, config.idR);
     t.stop("data.generate");
 
     /* lbvh (Linear Bounding Volume Hierarchy) */
@@ -97,15 +107,15 @@ int main(int, char**)
     shiftCallback = glm::vec3(config.sXR.avg(), config.sYR.avg(), config.sZR.avg());
 
     /* CUDA dimentions */
-    dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
-    dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE + 1);
-    dim3 threadsLinear = dim3(BLOCK_SIZE);
+    dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE2D + 1, b.m_maxHeight / BLOCK_SIZE2D + 1);
+    dim3 threads = dim3(BLOCK_SIZE2D, BLOCK_SIZE2D);
+    dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE1D + 1);
+    dim3 threadsLinear = dim3(BLOCK_SIZE1D);
 
 
 
     /* main render loop */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
 
     bool animation = true;
     while (!glfwWindowShouldClose(render.window))
@@ -137,8 +147,8 @@ int main(int, char**)
         t.start();
         bvh.construct();
         t.stop("construct in loop");
-        // animate (rotate with time)
 
+        /* animate (rotate lights over time) */
         if(animation) 
         {
             float deltaTime = render.getDeltaTime();

@@ -49,13 +49,17 @@ void dataObject::generate(
 void dataObject::generateLights(
     unsigned int count,
     range rR, range xR,
-    range yR, range zR)
+    range yR, range zR, 
+    range isR, range idR)
 {
     randomValueGenerator rGen(rR);
     randomValueGenerator xGen(xR);
     randomValueGenerator yGen(yR);
     randomValueGenerator zGen(zR);
-    randomValueGenerator colorGen(255.0f / 2.0f);
+
+    randomValueGenerator colorGen(1.0f);
+    randomValueGenerator isGen(isR);
+    randomValueGenerator idGen(idR);
 
     mh_lights.hMalloc(count);
     for (int i = 0; i < count; ++i) {
@@ -70,9 +74,9 @@ void dataObject::generateLights(
         obj.type = types::lightSource;
 
         // not used yet
-        obj.color.x = 255.0f / 2.0f;
-        obj.color.y = 255.0f / 2.0f;
-        obj.color.z = 255.0f / 2.0f;
+        obj.color.x = colorGen();
+        obj.color.y = colorGen();
+        obj.color.z = colorGen();
 
         // save generated data
         mh_lights.x[i] = obj.x;
@@ -80,8 +84,8 @@ void dataObject::generateLights(
         mh_lights.z[i] = obj.z;
         mh_lights.w[i] = obj.w;
 
-        mh_lights.is[i] = 0.2f;
-        mh_lights.id[i] = 0.2f;
+        mh_lights.is[i] = isGen();
+        mh_lights.id[i] = idGen();
 
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;

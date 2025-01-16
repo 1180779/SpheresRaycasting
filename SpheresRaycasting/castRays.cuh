@@ -12,12 +12,12 @@
 #include <thrust/device_ptr.h>
 
 #include "cudaWrappers.hpp"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 #include "lights.hpp"
 #include "lbvhConcrete.cuh"
 #include "rays.cuh"
 
-/* inline floatN Operations */
+/* inline float3 operations */
 /* ------------------------------------------------------------------------------- */
 
 /* operators */
@@ -107,17 +107,16 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     D.y = 0;
     D.z = 1.0f;
 
-    // find closes sphere (or light) by z coordinate
+    /* find closes sphere(or light) by z coordinate */ 
     unifiedObject closest;
     closest.x = FLT_MAX / 2.f;
     closest.y = FLT_MAX / 2.f;
     closest.z = FLT_MAX / 2.f;
     closest.r = 1.f;
 
-    // move throught the bhv tree
-    //auto ptrs = bvh.get_device_repr();
-
-    bvhNodeIdx stack[32]; // local stack
+    /* move throught the bhv tree */ 
+    /* note: shared memory stack appears to be slower */
+    bvhNodeIdx stack[32]; 
     int stack_ptr = 0;
     stack[stack_ptr++] = 0;
     while (stack_ptr > 0) {
@@ -125,14 +124,16 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         int indx = stack[--stack_ptr];
         bvhNode current = ptrs.nodes[indx];
 
-        if (!rayHit(ptrs.aabbs[indx].lower, ptrs.aabbs[indx].upper, O)) // no hit with the box, can skip this subtree
+        if (!rayHit(ptrs.aabbs[indx].lower, ptrs.aabbs[indx].upper, O)) /* no hit with the box, can skip this subtree */ 
             continue;
-        if (current.left_idx == 0xFFFFFFFF) // is leaf
+        if (current.left_idx == 0xFFFFFFFF) /* is leaf */
         {
             int i = current.object_idx;
-            // check if closer
+
+            /* check if hit is closer */
             
-            // check z (if closer by z coordinate)
+            /* check which spehre is closer by z coordinate of its center 
+                * assumes that spheres are of the same radius and are not overlapping */
             if (!(ptrs.objects[i].z < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
                 continue;
 
@@ -152,7 +153,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     }
     __syncthreads();
 
-    // if found no sphere return
+    /* if found no sphere, write background color to texture */
     if (closest.x == FLT_MAX / 2.f)
     {
         uchar4 notFoundWriteData;
@@ -166,26 +167,15 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
 
     if (closest.type == types::lightSource) {
         uchar4 writeData;
-        writeData.x = closest.color.x;
-        writeData.y = closest.color.y;
-        writeData.z = closest.color.z;
+        writeData.x = (unsigned char)(closest.color.x * 255.0f);
+        writeData.y = (unsigned char)(closest.color.y * 255.0f);
+        writeData.z = (unsigned char)(closest.color.z * 255.0f);
         writeData.w = 255;
         surf2Dwrite(writeData, surfaceObject, 4 * x, y);
         return;
     }
 
-    //if (closest.type == types::sphere) {
-    //    uchar4 writeData;
-    //    writeData.x = closest.color.x;
-    //    writeData.y = closest.color.y;
-    //    writeData.z = closest.color.z;
-    //    writeData.w = 255;
-    //    surf2Dwrite(writeData, surfaceObject, 4 * x, y);
-    //    return;
-    //}
-
-
-    // get point on the sphere
+    /* get point on the sphere */ 
     float3 C = make_float3(closest.x, closest.y, closest.z);
     //float a = 1.0f; 
     float b = 2 * dot(D, O - C);
@@ -202,7 +192,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     float3 V = normalize(O - P);
 
 
-    // calculate light
+    /* Phong light model */
     float3 color = lights.ia * closest.ka * closest.color;
     for (int i = 0; i < lights.count; ++i) {
         __syncthreads();
@@ -214,8 +204,11 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
             lights.id[i] * closest.kd * closest.color * fmaxf(0.0f, dot(L, N)) +
             lights.is[i] * closest.ks * closest.color * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
     }
+
+    /* clamp value */
     color = min(color, 1.0f);
 
+    /* write data to texture */
     uchar4 writeData;
     writeData.x = (unsigned char)(color.x * 255.0f);
     writeData.y = (unsigned char)(color.y * 255.0f);
@@ -223,6 +216,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     writeData.w = 255;
     surf2Dwrite(writeData, surfaceObject, 4 * x, y);
 }
+
 
 #endif
 

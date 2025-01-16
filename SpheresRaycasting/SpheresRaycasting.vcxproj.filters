@@ -125,7 +125,7 @@
     <ClInclude Include="lbvh\lbvh.cuh">
       <Filter>dependencies\lbvh</Filter>
     </ClInclude>
-    <ClInclude Include="unifiedObjects.hpp">
+    <ClInclude Include="unifiedObject.hpp">
       <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
     <ClInclude Include="castRays.cuh">
