@@ -41,6 +41,8 @@ void dataObject::generate(
         obj.kd = m.kd;
         obj.alpha = m.alpha;
 
+        assert(obj.alpha > 0.999f);
+
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
     }

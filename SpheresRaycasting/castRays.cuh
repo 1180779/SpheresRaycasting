@@ -210,7 +210,7 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
     float3 V = normalize(O - P);
 
 
-    float3 objColor = make_float3(objs.colorX[i], objs.colorY[i], objs.colorZ[i]);
+    float3 objColor = make_float3(0.0f, 0.5f, 0.0f);
     // calculate light
     float3 color = lights.ia * objs.ka[i] * objColor;
     for (int i = 0; i < lights.count; ++i) {
@@ -221,7 +221,7 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
 
         color = color +
             lights.id[i] * objs.kd[i] * objColor * fmaxf(0.0f, dot(L, N)) +
-            lights.is[i] * objs.ks[i] * objColor * __powf(fmaxf(0.0f, dot(R, V)), objs.alpha[i]);
+            lights.is[i] * objs.ks[i] * objColor * __powf(fmaxf(0.0f, fminf(dot(R, V), 1.0f)), objs.alpha[i]);
     }
 
     __syncthreads();
