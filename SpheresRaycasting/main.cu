@@ -60,8 +60,8 @@ int main(int, char**)
     timer t;
     t.start();
     dataObject data;
-    data.generate(10000, range(50, 50), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000), matType);
-    data.generateLights(10, range(100, 100), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000));
+    data.generate(10000, range(50, 50), range(0, 1920), range(0, 1080), range(2000, 4000), matType);
+    data.generateLights(1, range(200, 200), range(0, 1920), range(0, 1080), range(5000, 5000));
     t.stop("data.generate");
 
     /* lbvh (Linear Bounding Volume Hierarchy) */
@@ -73,8 +73,9 @@ int main(int, char**)
     t.stop("device repr");
 
     /* map data for callback functions (rotating objects with mouse) */
-    transformData tData;
+    transformData tData, tDataAnimate;
     tData.count = data.size();
+    tDataAnimate.count = data.size();
     spheresDataForCallback = &tData;
     spheresBvhForCallback = &ptrs;
     lightsCallback = &data.md_lights;
@@ -82,10 +83,13 @@ int main(int, char**)
     /* CUDA dimentions */
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE + 1);
+    dim3 threadsLinear = dim3(BLOCK_SIZE);
 
     /* main render loop */
     /*  ########################################################################## */
 
+    bool animation = true;
     while (!glfwWindowShouldClose(render.window))
     {
         glfwPollEvents();
@@ -98,7 +102,7 @@ int main(int, char**)
         ui.checkInput();
 
         ui.newFrame();
-        ui.settingsWindow(data.md_lights.ia);
+        ui.settingsWindow(data.md_lights.ia, animation);
 
         /* rendering */
         ImGui::Render();
@@ -116,7 +120,33 @@ int main(int, char**)
         bvh.construct();
         t.stop("construct in loop");
 
+        // animate (rotate with time)
+        if(animation) 
+        {
+            float deltaTime = render.getDeltaTime();
+            constexpr float sensitivityX = 50.0f;
+            constexpr float sensitivityY = 0.0f;
+            float xoffset = deltaTime * sensitivityX;
+            float yoffset = deltaTime * sensitivityY;
+
+            glm::mat4 t = glm::mat4(1.0f);
+            t = glm::translate(t, glm::vec3(1920.0f / 2.0f, 1080.0f / 2.0f, 0.0f));
+            t = glm::rotate(t, -glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f));
+            t = glm::rotate(t, glm::radians(yoffset), glm::vec3(1.0f, 0.0f, 0.0f));
+            t = glm::translate(t, glm::vec3(-1920.0f / 2.0f, -1080.0f / 2.0f, 0.0f));
+            tDataAnimate.t = t;
+            callbackLightsKernel<<<blocksLinear, threadsLinear>>>(tDataAnimate, ptrs, data.md_lights);
+            xcudaDeviceSynchronize();
+            xcudaGetLastError();
+            // TODO: add animation
+        }
+
+        /* cast rays */
         t.start();
+        data.md_lights.clearColor.x = render.clear_color.x; /* copy background color data */
+        data.md_lights.clearColor.y = render.clear_color.y;
+        data.md_lights.clearColor.z = render.clear_color.z;
+        data.md_lights.clearColor.w = render.clear_color.w;
         castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();

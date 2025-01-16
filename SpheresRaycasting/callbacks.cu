@@ -32,7 +32,7 @@ void mouseCallbackRotateAll(GLFWwindow* window, double xpos, double ypos)
 
     glm::mat4 t = glm::mat4(1.0f);
     t = glm::translate(t, glm::vec3(1920.0f / 2.0f, 1080.0f / 2.0f, 0.0f));
-    t = glm::rotate(t, -glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f));
+    t = glm::rotate(t, glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f));
     t = glm::rotate(t, glm::radians(yoffset), glm::vec3(1.0f, 0.0f, 0.0f));
     t = glm::translate(t, glm::vec3(-1920.0f / 2.0f, -1080.0f / 2.0f, 0.0f));
     spheresDataForCallback->t = t;

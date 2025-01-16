@@ -55,7 +55,7 @@ void imGuiUi::styleDark()
 
 void imGuiUi::constSettingsWindow(bool& start, materialGenerator::type& t)
 {
-    ImGui::SetNextWindowSize(ImVec2(400, 150));
+    //ImGui::SetNextWindowSize(ImVec2(400, 150));
     ImGui::Begin("Constant settings", NULL, ImGuiWindowFlags_NoResize);
     
     ImGui::SetNextItemWidth(150);
@@ -74,13 +74,15 @@ void imGuiUi::constSettingsWindow(bool& start, materialGenerator::type& t)
     ImGui::End();
 }
 
-void imGuiUi::settingsWindow(float& ia)
+void imGuiUi::settingsWindow(float& ia, bool& animate)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 100));
+    ImGui::SetNextWindowSize(ImVec2(300, 150));
     ImGui::Begin("Dynamic settings", NULL, ImGuiWindowFlags_NoResize);
 
     ImGui::SetNextItemWidth(150);
     ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
+
+    ImGui::Checkbox("Animate", &animate);
 
     ImGui::SetNextItemWidth(150);
     if(ImGui::InputFloat("Ia (ambient)", &ia, 0.005f, 0.01f)) 

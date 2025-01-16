@@ -156,10 +156,10 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     if (closest.x == FLT_MAX / 2.f)
     {
         uchar4 notFoundWriteData;
-        notFoundWriteData.x = 255;
-        notFoundWriteData.y = 255;
-        notFoundWriteData.z = 255;
-        notFoundWriteData.w = 255;
+        notFoundWriteData.x = (unsigned char)(lights.clearColor.x * 255.0f);
+        notFoundWriteData.y = (unsigned char)(lights.clearColor.y * 255.0f);
+        notFoundWriteData.z = (unsigned char)(lights.clearColor.z * 255.0f);
+        notFoundWriteData.w = (unsigned char)(lights.clearColor.w * 255.0f);
         surf2Dwrite(notFoundWriteData, surfaceObject, 4 * x, y);
         return;
     }
@@ -199,7 +199,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
 
     float3 P = O + i * D;
     float3 N = normalize(P - C);
-    float3 V = normalize(P - O);
+    float3 V = normalize(O - P);
 
 
     // calculate light
@@ -207,10 +207,10 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     for (int i = 0; i < lights.count; ++i) {
         __syncthreads();
 
-        float3 L = normalize(C - make_float3(lights.x[i], lights.y[i], lights.z[i]));
+        float3 L = normalize(make_float3(lights.x[i], lights.y[i], lights.z[i]) - C);
         float3 R = normalize(2 * (dot(L, N)) * N - L);
 
-        color = color + 
+        color = color +
             lights.id[i] * closest.kd * closest.color * fmaxf(0.0f, dot(L, N)) +
             lights.is[i] * closest.ks * closest.color * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
     }

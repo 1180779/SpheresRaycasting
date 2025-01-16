@@ -17,6 +17,7 @@ struct lights
     float* id; // diffuse light intensity ([0, 1])
 
     float ia = 0.5f;
+    float4 clearColor;
 
     //light operator()(int i) 
     //{

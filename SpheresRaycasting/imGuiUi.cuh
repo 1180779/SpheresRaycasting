@@ -30,7 +30,7 @@ public:
 
 
     void constSettingsWindow(bool& start, materialGenerator::type& t);
-    void settingsWindow(float& ia);
+    void settingsWindow(float& ia, bool& animate);
 
     /* check mouse and key input */
     void checkInput();

@@ -25,6 +25,8 @@ public:
     const char* glsl_version;
     ImVec4 clear_color = ImVec4(0.f, 0.f, 0.f, 1.00f);
 
+    inline float getDeltaTime() { return m_deltaTime; }
+
 private:
     float m_currFrame = 0.f;
     float m_lastFrame = 0.f;
