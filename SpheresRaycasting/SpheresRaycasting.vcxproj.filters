@@ -158,6 +158,9 @@
     <ClInclude Include="range.hpp">
       <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="unifiedObjects.cuh">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">

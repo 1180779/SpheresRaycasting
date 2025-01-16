@@ -1,6 +1,6 @@
 
-#ifndef U1180779_UNIFIED_OBJECTS_H
-#define U1180779_UNIFIED_OBJECTS_H
+#ifndef U1180779_UNIFIED_OBJECT_H
+#define U1180779_UNIFIED_OBJECT_H
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>

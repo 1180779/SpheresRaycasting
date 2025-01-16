@@ -130,6 +130,7 @@
     <ClInclude Include="dataObject.hpp" />
     <ClInclude Include="transformScene.hpp" />
     <ClInclude Include="unifiedObject.hpp" />
+    <ClInclude Include="unifiedObjects.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
