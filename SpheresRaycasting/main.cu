@@ -1,89 +1,93 @@
 ﻿
-/* CUDA */
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-
-#include "castRays.cuh"
-#include "buffer.hpp"
-#include "cudaWrappers.hpp"
-
-#include "callbacks.cuh"
-
-/* NOT CUDA */
-#include "rendering.hpp"
-#include "imGuiUi.cuh"
-
-#include "shader.hpp"
-#include "mat4.cuh"
-#include "dataObject.hpp"
-
 #include "lbvh/lbvh.cuh"
 
+#include "imGuiUi.cuh"
+#include "castRays.cuh"
+#include "callbacks.cuh"
+
+#include "rendering.hpp"
+#include "buffer.hpp"
+#include "cudaWrappers.hpp"
+#include "shader.hpp"
+#include "dataObject.hpp"
 #include "timer.hpp"
-#include <vector>
-
-void matTests() {
-    glm::mat4 tGLM = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    mat4 t;
-    t = tGLM;
-
-    glm::vec4 vGLM(1.f, 1.f, 1.f, 1.f);
-    vec4 v(1.f, 1.f, 1.f, 1.f);
-
-    v = t * v;
-    vGLM = tGLM * vGLM;
-
-    std::cout << "x = " << v(0) << ", y = " << v(1) << ", z = " << v(2) << ", wGLM = " << v(3) << std::endl;
-    std::cout << "xGLM = " << vGLM[0] << ", yGLM = " << vGLM[1] << ", zGLM = " << vGLM[2] << ", wGLM = " << vGLM[3] << std::endl;
-}
 
 int main(int, char**)
 {
-    //matTests();
-    //return;
-
+    /* init openGL and imGui (ui) */
     rendering render = rendering();
     imGuiUi ui = imGuiUi(render);
     ui.styleLight();
     ui.styleRounded();
     render.initGL();
 
+    /* init CUDA */
     xcudaSetDevice(0);
 
+    /* const settings loop */
+    /*  ########################################################################## */
+    materialGenerator::type matType;
+    bool start = false;
+    while (!glfwWindowShouldClose(render.window) && !start)
+    {
+        glfwPollEvents();
+        if (glfwGetWindowAttrib(render.window, GLFW_ICONIFIED) != 0)
+        {
+            ImGui_ImplGlfw_Sleep(10);
+            continue;
+        }
+        ui.newFrame();
+        ui.constSettingsWindow(start, matType);
+
+        /* rendering */
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(render.window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        render.clearColor();
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        render.swapBuffers();
+    }
+
+    /* create openGL texture for CUDA */
     buffer b = buffer();
-    
+
+    /* generate data (spheres + lights) */
     timer t;
     t.start();
     dataObject data;
-    data.generate(10000, range(50, 50), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000));
+    data.generate(10000, range(50, 50), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000), matType);
     data.generateLights(10, range(100, 100), range(-1920, 1920), range(-1080, 1080), range(-4000, 4000));
     t.stop("data.generate");
 
+    /* lbvh (Linear Bounding Volume Hierarchy) */
     t.start();
     lbvh::bvh<float, unifiedObject, aabb_getter> bvh(data.m_objs.begin(), data.m_objs.end());
     t.stop("first tree generation");
-    
     t.start();
-    const auto ptrs = bvh.get_device_repr(); // get a set of device (raw) pointers to use it in device functions.
+    const auto ptrs = bvh.get_device_repr();
     t.stop("device repr");
 
+    /* map data for callback functions (rotating objects with mouse) */
     transformData tData;
     tData.count = data.size();
     spheresDataForCallback = &tData;
     spheresBvhForCallback = &ptrs;
     lightsCallback = &data.md_lights;
 
+    /* CUDA dimentions */
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
 
-    // Main loop
+    /* main render loop */
+    /*  ########################################################################## */
+
     while (!glfwWindowShouldClose(render.window))
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
         if (glfwGetWindowAttrib(render.window, GLFW_ICONIFIED) != 0)
         {
@@ -94,23 +98,20 @@ int main(int, char**)
         ui.checkInput();
 
         ui.newFrame();
-        ui.settingsWindow();
+        ui.settingsWindow(data.md_lights.ia);
 
-
-        // Rendering
+        /* rendering */
         ImGui::Render();
         ui.handleInput();
         int display_w, display_h;
         glfwGetFramebufferSize(render.window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        render.clearColor();
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        //std::cout << "\n\nTIME MEASUREMENTS " << std::endl;
+        /* buffer clear is unnecessary, texture is drawn on whole screen */
+        //render.clearColor();
+        //glClear(GL_DEPTH_BUFFER_BIT);
 
         b.mapCudaResource();
 
-        //timer t;
         t.start();
         bvh.construct();
         t.stop("construct in loop");
@@ -120,13 +121,6 @@ int main(int, char**)
         xcudaDeviceSynchronize();
         xcudaGetLastError();
         t.stop("castRaysKernel");
-
-        //data.mh_spheres.copyDeviceToHost(raysData.sData);
-        //std::cout << "\n\n";
-        //std::cout << "DATA" << std::endl;
-        //for (int i = 0; i < data.mh_spheres.count; ++i) {
-        //    std::cout << "x = " << data.mh_spheres.x[i] << ", y = " << data.mh_spheres.y[i] << ", z = " << data.mh_spheres.z[i] << ", r = " << data.mh_spheres.r[i] << std::endl;
-        //}
 
         b.unmapCudaResource();
         b.use();

@@ -2,6 +2,9 @@
 #ifndef U1180779_RANDOM_VALUE_GENERATOR_H
 #define U1180779_RANDOM_VALUE_GENERATOR_H
 
+#include <cstdlib>
+#include <ctime>
+
 struct range
 {
     range() : min(0), max(0) { }

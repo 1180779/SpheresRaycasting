@@ -203,8 +203,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
 
 
     // calculate light
-    // i_a = 0.5
-    float3 color = 0.5 * closest.ka * closest.color;
+    float3 color = lights.ia * closest.ka * closest.color;
     for (int i = 0; i < lights.count; ++i) {
         __syncthreads();
 

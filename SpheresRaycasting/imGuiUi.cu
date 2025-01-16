@@ -53,13 +53,43 @@ void imGuiUi::styleDark()
     ImGui::StyleColorsDark();
 }
 
-void imGuiUi::settingsWindow()
+void imGuiUi::constSettingsWindow(bool& start, materialGenerator::type& t)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 80));
+    ImGui::SetNextWindowSize(ImVec2(400, 150));
+    ImGui::Begin("Constant settings", NULL, ImGuiWindowFlags_NoResize);
+    
+    ImGui::SetNextItemWidth(150);
+    ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
+    
+    static int item = 0;
+    if (ImGui::Combo("material type", &item, materialGenerator::typeString, 7))
+    {
+        t = static_cast<materialGenerator::type>(item);
+    }
+    
+
+    start = ImGui::Button("Start");
+
+    ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+}
+
+void imGuiUi::settingsWindow(float& ia)
+{
+    ImGui::SetNextWindowSize(ImVec2(300, 100));
     ImGui::Begin("Dynamic settings", NULL, ImGuiWindowFlags_NoResize);
 
     ImGui::SetNextItemWidth(150);
     ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
+
+    ImGui::SetNextItemWidth(150);
+    if(ImGui::InputFloat("Ia (ambient)", &ia, 0.005f, 0.01f)) 
+    {
+        if (ia < 0.0f)
+            ia = 0.0f;
+        if (ia > 1.0f)
+            ia = 1.0f;
+    }
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();

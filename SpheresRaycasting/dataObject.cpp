@@ -3,12 +3,11 @@
 #include "cudaWrappers.hpp"
 #include <iostream>
 
-#include "materialGenerator.hpp"
-
 void dataObject::generate(
     unsigned int count, 
     range rR, range xR, 
-    range yR, range zR)
+    range yR, range zR, 
+    materialGenerator::type t)
 {
     randomValueGenerator rGen(rR);
     randomValueGenerator xGen(xR);
@@ -16,7 +15,7 @@ void dataObject::generate(
     randomValueGenerator zGen(zR);
     randomValueGenerator colorGen(0.0f, 1.0f);
 
-    materialGenerator matGen(materialGenerator::type::reflective);
+    materialGenerator matGen(t);
 
     m_objs.reserve(count);
     for (int i = 0; i < count; ++i) {

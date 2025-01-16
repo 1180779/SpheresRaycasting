@@ -16,6 +16,8 @@ struct lights
     float* is; // specular light intensity ([0, 1])
     float* id; // diffuse light intensity ([0, 1])
 
+    float ia = 0.5f;
+
     //light operator()(int i) 
     //{
     //    light l;

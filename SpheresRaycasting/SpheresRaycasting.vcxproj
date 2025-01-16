@@ -142,6 +142,7 @@
     <ClCompile Include="imGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imGui\imgui_tables.cpp" />
     <ClCompile Include="imGui\imgui_widgets.cpp" />
+    <ClCompile Include="materialGenerator.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />

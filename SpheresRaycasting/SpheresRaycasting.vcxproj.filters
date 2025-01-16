@@ -196,6 +196,9 @@
     <ClCompile Include="glad.c">
       <Filter>dependencies\openGL</Filter>
     </ClCompile>
+    <ClCompile Include="materialGenerator.cpp">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="lbvh\LICENSE.txt">

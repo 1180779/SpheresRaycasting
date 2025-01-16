@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "randomValueGenerator.hpp"
+#include "materialGenerator.hpp"
 #include "unifiedObjects.hpp"
 #include "lights.hpp"
 
@@ -23,7 +24,8 @@ public:
     void generate(
         unsigned int count, 
         range rR, range xR,
-        range yR, range zR);
+        range yR, range zR,
+        materialGenerator::type t = materialGenerator::type::reflective);
 
     void generateLights(
         unsigned int count,
