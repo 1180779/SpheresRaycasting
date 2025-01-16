@@ -13,6 +13,7 @@
 
 #include "cudaWrappers.hpp"
 #include "unifiedObject.hpp"
+#include "unifiedObjects.cuh"
 #include "lights.hpp"
 #include "lbvhConcrete.cuh"
 #include "rays.cuh"
@@ -88,7 +89,7 @@ __device__ __forceinline__ float3 max(float3 a, float f)
 /* kernel to cast rays */
 /* ------------------------------------------------------------------------------- */
 
-__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights)
+__global__ void findClosestKernel(const bvhDevice ptrs, int width, int height, unifiedObjects objs, lights lights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
@@ -96,16 +97,10 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     if (x >= width || y >= height)
         return;
 
-    // ray origin
-    float3 O;
+    float3 O; // ray origin
     O.x = x;
     O.y = y;
     O.z = 0;
-
-    float3 D;
-    D.x = 0;
-    D.y = 0;
-    D.z = 1.0f;
 
     // find closes sphere (or light) by z coordinate
     unifiedObject closest;
@@ -152,8 +147,20 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     }
     __syncthreads();
 
+    objs.set(closest, y * width + x);
+}
+
+__global__ void drawColorKernel(unifiedObjects objs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
+    int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
+
+    if (x >= width || y >= height)
+        return;
+    int i = y * width + x;
+
     // if found no sphere return
-    if (closest.x == FLT_MAX / 2.f)
+    if (objs.x[i] == FLT_MAX / 2.f)
     {
         uchar4 notFoundWriteData;
         notFoundWriteData.x = (unsigned char)(lights.clearColor.x * 255.0f);
@@ -164,46 +171,48 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         return;
     }
 
-    if (closest.type == types::lightSource) {
+    if (objs.type[i] == types::lightSource) {
         uchar4 writeData;
-        writeData.x = closest.color.x;
-        writeData.y = closest.color.y;
-        writeData.z = closest.color.z;
+        writeData.x = objs.colorX[i];
+        writeData.y = objs.colorY[i];
+        writeData.z = objs.colorZ[i];
         writeData.w = 255;
         surf2Dwrite(writeData, surfaceObject, 4 * x, y);
         return;
     }
 
-    //if (closest.type == types::sphere) {
-    //    uchar4 writeData;
-    //    writeData.x = closest.color.x;
-    //    writeData.y = closest.color.y;
-    //    writeData.z = closest.color.z;
-    //    writeData.w = 255;
-    //    surf2Dwrite(writeData, surfaceObject, 4 * x, y);
-    //    return;
-    //}
+    __syncthreads();
 
+    float3 O; // ray origin
+    O.x = x;
+    O.y = y;
+    O.z = 0;
+
+    float3 D; // ray direction
+    D.x = 0;
+    D.y = 0;
+    D.z = 1.0f;
 
     // get point on the sphere
-    float3 C = make_float3(closest.x, closest.y, closest.z);
+    float3 C = make_float3(objs.x[i], objs.y[i], objs.z[i]);
     //float a = 1.0f; 
     float b = 2 * dot(D, O - C);
-    float c = dot(O - C, O - C) - closest.r * closest.r;
+    float c = dot(O - C, O - C) - objs.r[i] * objs.r[i];
 
     float delta = b * b - 4 * c;
     delta = sqrt(delta);
     float i1 = ((-b - delta) / 2.0f);
     float i2 = ((-b + delta) / 2.0f);
-    float i = i1 < i2 ? i1 : i2;
+    float t = i1 < i2 ? i1 : i2;
 
-    float3 P = O + i * D;
+    float3 P = O + t * D;
     float3 N = normalize(P - C);
     float3 V = normalize(O - P);
 
 
+    float3 objColor = make_float3(objs.colorX[i], objs.colorY[i], objs.colorZ[i]);
     // calculate light
-    float3 color = lights.ia * closest.ka * closest.color;
+    float3 color = lights.ia * objs.ka[i] * objColor;
     for (int i = 0; i < lights.count; ++i) {
         __syncthreads();
 
@@ -211,9 +220,12 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         float3 R = normalize(2 * (dot(L, N)) * N - L);
 
         color = color +
-            lights.id[i] * closest.kd * closest.color * fmaxf(0.0f, dot(L, N)) +
-            lights.is[i] * closest.ks * closest.color * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
+            lights.id[i] * objs.kd[i] * objColor * fmaxf(0.0f, dot(L, N)) +
+            lights.is[i] * objs.ks[i] * objColor * __powf(fmaxf(0.0f, dot(R, V)), objs.alpha[i]);
     }
+
+    __syncthreads();
+
     color = min(color, 1.0f);
 
     uchar4 writeData;
@@ -223,11 +235,6 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     writeData.w = 255;
     surf2Dwrite(writeData, surfaceObject, 4 * x, y);
 }
-
-//__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights) 
-//{
-//
-//}
 
 
 #endif

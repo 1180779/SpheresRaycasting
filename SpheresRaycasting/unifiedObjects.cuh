@@ -29,7 +29,7 @@ struct unifiedObjects
 
     __device__ __forceinline__ void set(const unifiedObject& other, int i);
 
-    void dMalloc();
+    void dMalloc(unsigned int c);
     void dFree();
 };
 
@@ -51,15 +51,16 @@ __device__ __forceinline__ void unifiedObjects::set(const unifiedObject& other, 
     alpha[i] = other.alpha;
 }
 
-void unifiedObjects::dMalloc()
+void unifiedObjects::dMalloc(unsigned int c)
 {
+    count = c;
+
     xcudaMalloc(&x, sizeof(float) * count);
     xcudaMalloc(&y, sizeof(float) * count);
     xcudaMalloc(&z, sizeof(float) * count);
     xcudaMalloc(&r, sizeof(float) * count);
     
     xcudaMalloc(&type, sizeof(types) * count);
-    
     xcudaMalloc(&colorX, sizeof(float) * count);
     xcudaMalloc(&colorY, sizeof(float) * count);
     xcudaMalloc(&colorZ, sizeof(float) * count);
