@@ -137,6 +137,9 @@
     <ClInclude Include="randomValueGenerator.hpp">
       <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="materialGenerator.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">

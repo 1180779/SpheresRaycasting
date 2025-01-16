@@ -3,6 +3,8 @@
 #include "cudaWrappers.hpp"
 #include <iostream>
 
+#include "materialGenerator.hpp"
+
 void dataObject::generate(
     unsigned int count, 
     range rR, range xR, 
@@ -14,6 +16,8 @@ void dataObject::generate(
     randomValueGenerator zGen(zR);
     randomValueGenerator colorGen(0.0f, 1.0f);
 
+    materialGenerator matGen(materialGenerator::type::soft);
+
     m_objs.reserve(count);
     for (int i = 0; i < count; ++i) {
         // TODO: check that spheres do not overlap
@@ -24,16 +28,19 @@ void dataObject::generate(
         obj.w = 1.0f;
         obj.r = rGen();
         
+
         obj.type = types::sphere;
 
         obj.color.x = colorGen();
         obj.color.y = colorGen();
         obj.color.z = colorGen();
 
-        obj.ka = 0.3f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5f - 0.3f)));
-        obj.ks = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f - 0.7f)));;
-        obj.kd = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.7f - 0.5f)));
-        obj.alpha = 2.0f;
+        material m = matGen();
+
+        obj.ka = m.ka;
+        obj.ks = m.ks;
+        obj.kd = m.kd;
+        obj.alpha = m.alpha;
 
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;

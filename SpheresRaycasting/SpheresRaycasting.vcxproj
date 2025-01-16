@@ -116,6 +116,7 @@
     <ClInclude Include="lbvh\utility.cuh" />
     <ClInclude Include="lights.hpp" />
     <ClInclude Include="mat4.cuh" />
+    <ClInclude Include="materialGenerator.hpp" />
     <ClInclude Include="randomValueGenerator.hpp" />
     <ClInclude Include="rays.cuh" />
     <ClInclude Include="rendering.hpp" />
