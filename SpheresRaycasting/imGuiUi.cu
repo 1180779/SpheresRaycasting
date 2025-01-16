@@ -1,5 +1,5 @@
 
-#include "imGuiUi.hpp"
+#include "imGuiUi.cuh"
 
 imGuiUi::imGuiUi(rendering& rendering) : m_rendering(rendering), io((ImGui::CreateContext(), ImGui::GetIO()))
 {
@@ -63,6 +63,45 @@ void imGuiUi::settingsWindow()
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
+}
+
+void imGuiUi::checkInput()
+{
+    m_inputEscape = false;
+    m_inputMouseClicked = false;
+    m_inputMouseInView = true;
+    if(ImGui::IsKeyPressed(ImGuiKey_Escape))
+    {
+        m_inputEscape = true;
+    }
+    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) 
+    {
+        m_inputMouseClicked = true;
+    }
+}
+
+void imGuiUi::handleInput()
+{
+    if(m_inputMouseLocked) 
+    {
+        if(m_inputEscape) 
+        {
+            /* release the mouse, reenable glfw mouse callback */
+            glfwSetInputMode(m_rendering.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetCursorPosCallback(m_rendering.window, ImGui_ImplGlfw_CursorPosCallback);
+            m_inputMouseLocked = false;
+        }
+    }
+    else 
+    {
+        if(m_inputMouseClicked && !io.WantCaptureMouse) 
+        {
+            /* capture the mouse */
+            glfwSetInputMode(m_rendering.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetCursorPosCallback(m_rendering.window, mouseCallbackRotateLights);
+            m_inputMouseLocked = true;
+        }
+    }
 }
 
 void imGuiUi::newFrame()

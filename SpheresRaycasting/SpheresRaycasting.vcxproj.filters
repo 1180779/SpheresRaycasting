@@ -39,6 +39,15 @@
     <CudaCompile Include="main.cu">
       <Filter>source</Filter>
     </CudaCompile>
+    <CudaCompile Include="callbacks.cu">
+      <Filter>source\cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="transformScene.cu">
+      <Filter>source\cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="imGuiUi.cu">
+      <Filter>source\rendering</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imGui\imstb_truetype.h">
@@ -77,7 +86,7 @@
     <ClInclude Include="rendering.hpp">
       <Filter>source\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="imGuiUi.hpp">
+    <ClInclude Include="imGuiUi.cuh">
       <Filter>source\rendering</Filter>
     </ClInclude>
     <ClInclude Include="mat4.cuh">
@@ -140,6 +149,9 @@
     <ClInclude Include="materialGenerator.hpp">
       <Filter>source\cuda\dataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="transformScene.hpp">
+      <Filter>source\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">
@@ -170,9 +182,6 @@
       <Filter>source\cuda\camera</Filter>
     </ClCompile>
     <ClCompile Include="rendering.cpp">
-      <Filter>source\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="imGuiUi.cpp">
       <Filter>source\rendering</Filter>
     </ClCompile>
     <ClCompile Include="shaderSource.cpp">

@@ -11,7 +11,7 @@
 
 /* NOT CUDA */
 #include "rendering.hpp"
-#include "imGuiUi.hpp"
+#include "imGuiUi.cuh"
 
 #include "shader.hpp"
 #include "mat4.cuh"
@@ -50,8 +50,6 @@ int main(int, char**)
 
     xcudaSetDevice(0);
 
-    disableCursor(render);
-
     buffer b = buffer();
     
     timer t;
@@ -64,10 +62,9 @@ int main(int, char**)
     t.start();
     lbvh::bvh<float, unifiedObject, aabb_getter> bvh(data.m_objs.begin(), data.m_objs.end());
     t.stop("first tree generation");
-    // get a set of device (raw) pointers to use it in device functions.
-    // Do not use this on host!
+    
     t.start();
-    const auto ptrs = bvh.get_device_repr();
+    const auto ptrs = bvh.get_device_repr(); // get a set of device (raw) pointers to use it in device functions.
     t.stop("device repr");
 
     transformData tData;
@@ -82,10 +79,6 @@ int main(int, char**)
     // Main loop
     while (!glfwWindowShouldClose(render.window))
     {
-        if (glfwGetKey(render.window, GLFW_KEY_ESCAPE)) {
-            glfwSetWindowShouldClose(render.window, GL_TRUE);
-        }
-        render.measureDeltaTime();
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -97,12 +90,16 @@ int main(int, char**)
             ImGui_ImplGlfw_Sleep(10);
             continue;
         }
+        render.measureDeltaTime();
+        ui.checkInput();
 
         ui.newFrame();
         ui.settingsWindow();
 
+
         // Rendering
         ImGui::Render();
+        ui.handleInput();
         int display_w, display_h;
         glfwGetFramebufferSize(render.window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);

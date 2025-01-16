@@ -89,7 +89,9 @@
     <CudaLink />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="callbacks.cu" />
     <CudaCompile Include="main.cu" />
+    <CudaCompile Include="transformScene.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.hpp" />
@@ -97,7 +99,7 @@
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
     <ClInclude Include="cudaWrappers.hpp" />
-    <ClInclude Include="imGuiUi.hpp" />
+    <ClInclude Include="imGuiUi.cuh" />
     <ClInclude Include="imGui\imconfig.h" />
     <ClInclude Include="imGui\imgui.h" />
     <ClInclude Include="imGui\imgui_impl_glfw.h" />
@@ -124,12 +126,15 @@
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="dataObject.hpp" />
+    <ClInclude Include="transformScene.hpp" />
     <ClInclude Include="unifiedObjects.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="imGuiUi.cpp" />
+    <CudaCompile Include="imGuiUi.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="imGui\imgui.cpp" />
     <ClCompile Include="imGui\imgui_demo.cpp" />
     <ClCompile Include="imGui\imgui_draw.cpp" />

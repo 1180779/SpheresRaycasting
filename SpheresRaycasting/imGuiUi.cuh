@@ -14,6 +14,8 @@
 #include "imGui/imgui_impl_glfw.h"
 #include "imGui/imgui_impl_opengl3.h"
 
+#include "callbacks.cuh"
+
 class imGuiUi 
 {
 public:
@@ -25,11 +27,23 @@ public:
     void styleLight();
     void styleDark();
 
+
     void settingsWindow();
+
+    /* check mouse and key input */
+    void checkInput();
+
+    /* handle the input read with checkInput; run after all imGui are displayed */
+    void handleInput();
+
     void newFrame();
     ImGuiIO& io;
 
 private:
+    bool m_inputEscape = false; /* escaped pressed */
+    bool m_inputMouseClicked = false; /* mouse clicked */
+    bool m_inputMouseLocked = false; /* mouse is locked and used to perform object rotation */
+    bool m_inputMouseInView = false; /* mouse is not on any imGui control */
     rendering& m_rendering;
 };
 

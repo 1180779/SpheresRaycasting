@@ -16,7 +16,7 @@ void dataObject::generate(
     randomValueGenerator zGen(zR);
     randomValueGenerator colorGen(0.0f, 1.0f);
 
-    materialGenerator matGen(materialGenerator::type::soft);
+    materialGenerator matGen(materialGenerator::type::reflective);
 
     m_objs.reserve(count);
     for (int i = 0; i < count; ++i) {
