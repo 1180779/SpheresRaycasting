@@ -107,6 +107,10 @@ __global__ void findClosestKernel(const bvhDevice ptrs, int width, int height, u
     closest.x = FLT_MAX / 2.f;
     closest.y = FLT_MAX / 2.f;
     closest.z = FLT_MAX / 2.f;
+    closest.ka = 0.5f;
+    closest.ks = 0.5f;
+    closest.kd = 0.5f;
+    closest.alpha = 1.0f;
     closest.r = 1.f;
 
     // move throught the bhv tree
@@ -145,9 +149,13 @@ __global__ void findClosestKernel(const bvhDevice ptrs, int width, int height, u
                 stack[stack_ptr++] = current.right_idx;
         }
     }
-    __syncthreads();
 
-    objs.set(closest, y * width + x);
+    int i = y * width + x;
+    objs.set(closest, i);
+
+    assert(objs.ka[i] >= 0.0f && objs.ka[i] <= 1.0f);
+    assert(objs.kd[i] >= 0.0f && objs.kd[i] <= 1.0f);
+    assert(objs.ks[i] >= 0.0f && objs.ks[i] <= 1.0f);
 }
 
 __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights)
@@ -160,7 +168,7 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
     int i = y * width + x;
 
     // if found no sphere return
-    if (objs.x[i] == FLT_MAX / 2.f)
+    if (abs(objs.x[i] - FLT_MAX / 2.f) <= 6 * std::numeric_limits<float>::epsilon())
     {
         uchar4 notFoundWriteData;
         notFoundWriteData.x = (unsigned char)(lights.clearColor.x * 255.0f);
@@ -171,17 +179,17 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
         return;
     }
 
+    assert(objs.x[i] < FLT_MAX / 4.0f);
+
     if (objs.type[i] == types::lightSource) {
         uchar4 writeData;
-        writeData.x = objs.colorX[i];
-        writeData.y = objs.colorY[i];
-        writeData.z = objs.colorZ[i];
+        writeData.x = (unsigned char)(objs.colorX[i] * 255.0f);
+        writeData.y = (unsigned char)(objs.colorY[i] * 255.0f);
+        writeData.z = (unsigned char)(objs.colorZ[i] * 255.0f);
         writeData.w = 255;
         surf2Dwrite(writeData, surfaceObject, 4 * x, y);
         return;
     }
-
-    __syncthreads();
 
     float3 O; // ray origin
     O.x = x;
@@ -210,11 +218,10 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
     float3 V = normalize(O - P);
 
 
-    float3 objColor = make_float3(0.0f, 0.5f, 0.0f);
+    float3 objColor = make_float3(objs.x[i], objs.y[i], objs.z[i]);
     // calculate light
     float3 color = lights.ia * objs.ka[i] * objColor;
     for (int i = 0; i < lights.count; ++i) {
-        __syncthreads();
 
         float3 L = normalize(make_float3(lights.x[i], lights.y[i], lights.z[i]) - C);
         float3 R = normalize(2 * (dot(L, N)) * N - L);
@@ -223,8 +230,6 @@ __global__ void drawColorKernel(unifiedObjects objs, int width, int height, cuda
             lights.id[i] * objs.kd[i] * objColor * fmaxf(0.0f, dot(L, N)) +
             lights.is[i] * objs.ks[i] * objColor * __powf(fmaxf(0.0f, fminf(dot(R, V), 1.0f)), objs.alpha[i]);
     }
-
-    __syncthreads();
 
     color = min(color, 1.0f);
 
