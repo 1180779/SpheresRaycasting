@@ -12,7 +12,7 @@
 #include <thrust/device_ptr.h>
 
 #include "cudaWrappers.hpp"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 #include "lights.hpp"
 #include "lbvhConcrete.cuh"
 #include "rays.cuh"
@@ -223,6 +223,12 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     writeData.w = 255;
     surf2Dwrite(writeData, surfaceObject, 4 * x, y);
 }
+
+//__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights) 
+//{
+//
+//}
+
 
 #endif
 

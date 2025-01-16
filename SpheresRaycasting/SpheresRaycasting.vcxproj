@@ -129,7 +129,7 @@
     <ClInclude Include="shaderSource.hpp" />
     <ClInclude Include="dataObject.hpp" />
     <ClInclude Include="transformScene.hpp" />
-    <ClInclude Include="unifiedObjects.hpp" />
+    <ClInclude Include="unifiedObject.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />

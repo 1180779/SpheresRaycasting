@@ -9,7 +9,7 @@
 
 #include "randomValueGenerator.hpp"
 #include "materialGenerator.hpp"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 #include "lights.hpp"
 
 /* holds both device and host copies of the scene objects data */

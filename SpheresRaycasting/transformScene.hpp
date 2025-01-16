@@ -6,7 +6,7 @@
 #include <device_launch_parameters.h>
 
 #include "lbvhConcrete.cuh"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 #include "mat4.cuh"
 #include "lights.hpp"
 

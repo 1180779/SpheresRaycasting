@@ -3,7 +3,7 @@
 #define U1180779_LBVH_CONCRETE_CUH
 
 #include "lbvh/lbvh.cuh"
-#include "unifiedObjects.hpp"
+#include "unifiedObject.hpp"
 
 struct aabb_getter
 {
