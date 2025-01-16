@@ -97,6 +97,9 @@ void buffer::use()
 
 void buffer::mapCudaResource()
 {
+    try
+    {
+
     xcudaGraphicsMapResources(1, &m_cudaResource);
     cudaArray_t textureArray;
     xcudaGraphicsSubResourceGetMappedArray(&textureArray, m_cudaResource, 0, 0);
@@ -108,6 +111,15 @@ void buffer::mapCudaResource()
 
     // Create a surface object
     xcudaCreateSurfaceObject(&m_surfaceObject, &resDesc);
+    }
+    catch(std::exception e) 
+    {
+        std::cout << "Exception occoured!!" << e.what() << std::endl;
+    }
+    catch(...) 
+    {
+        std::cout << "some other exception" << std::endl;
+    }
 }
 
 void buffer::unmapCudaResource()

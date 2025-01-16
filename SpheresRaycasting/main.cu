@@ -28,7 +28,19 @@ int main(int, char**)
 
     /* const settings loop */
     /*  ########################################################################## */
-    materialGenerator::type matType;
+    sceneConfig config;
+    config.sCount = 1000;
+    config.sXR = range(0, 1920);
+    config.sYR = range(0, 1080);
+    config.sZR = range(2000, 4000);
+    config.sRR = range(50, 50);
+    
+    config.lCount = 10;
+    config.lXR = range(0, 1920);
+    config.lYR = range(0, 1080);
+    config.lZR = range(2000, 4000);
+    config.lRR = range(20, 20);
+
     bool start = false;
     while (!glfwWindowShouldClose(render.window) && !start)
     {
@@ -39,7 +51,7 @@ int main(int, char**)
             continue;
         }
         ui.newFrame();
-        ui.constSettingsWindow(start, matType);
+        ui.constSettingsWindow(start, config);
 
         /* rendering */
         ImGui::Render();
@@ -53,6 +65,9 @@ int main(int, char**)
         render.swapBuffers();
     }
 
+    /* preparation (data creation etc.) */
+    /*  ########################################################################## */
+
     /* create openGL texture for CUDA */
     buffer b = buffer();
 
@@ -60,8 +75,8 @@ int main(int, char**)
     timer t;
     t.start();
     dataObject data;
-    data.generate(10000, range(50, 50), range(0, 1920), range(0, 1080), range(2000, 4000), matType);
-    data.generateLights(1, range(200, 200), range(0, 1920), range(0, 1080), range(5000, 5000));
+    data.generate(config.sCount, config.sRR, config.sXR, config.sYR, config.sZR, config.matType);
+    data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR);
     t.stop("data.generate");
 
     /* lbvh (Linear Bounding Volume Hierarchy) */
@@ -79,12 +94,15 @@ int main(int, char**)
     spheresDataForCallback = &tData;
     spheresBvhForCallback = &ptrs;
     lightsCallback = &data.md_lights;
+    shiftCallback = glm::vec3(config.sXR.avg(), config.sYR.avg(), config.sZR.avg());
 
     /* CUDA dimentions */
     dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
     dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
     dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE + 1);
     dim3 threadsLinear = dim3(BLOCK_SIZE);
+
+
 
     /* main render loop */
     /*  ########################################################################## */
@@ -119,8 +137,8 @@ int main(int, char**)
         t.start();
         bvh.construct();
         t.stop("construct in loop");
-
         // animate (rotate with time)
+
         if(animation) 
         {
             float deltaTime = render.getDeltaTime();
@@ -130,10 +148,10 @@ int main(int, char**)
             float yoffset = deltaTime * sensitivityY;
 
             glm::mat4 t = glm::mat4(1.0f);
-            t = glm::translate(t, glm::vec3(1920.0f / 2.0f, 1080.0f / 2.0f, 0.0f));
+            t = glm::translate(t, shiftCallback);
             t = glm::rotate(t, -glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f));
             t = glm::rotate(t, glm::radians(yoffset), glm::vec3(1.0f, 0.0f, 0.0f));
-            t = glm::translate(t, glm::vec3(-1920.0f / 2.0f, -1080.0f / 2.0f, 0.0f));
+            t = glm::translate(t, -shiftCallback);
             tDataAnimate.t = t;
             callbackLightsKernel<<<blocksLinear, threadsLinear>>>(tDataAnimate, ptrs, data.md_lights);
             xcudaDeviceSynchronize();

@@ -15,6 +15,8 @@ extern transformData* spheresDataForCallback;
 extern const bvhDevice* spheresBvhForCallback;
 extern lights* lightsCallback;
 
+extern glm::vec3 shiftCallback;
+
 static float lastX = 1280 / 2, lastY = 720 / 2;
 
 /* mouse callbacks to rotate part of objects */

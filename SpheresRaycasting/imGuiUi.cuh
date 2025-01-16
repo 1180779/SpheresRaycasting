@@ -14,7 +14,7 @@
 #include "imGui/imgui_impl_glfw.h"
 #include "imGui/imgui_impl_opengl3.h"
 
-#include "materialGenerator.hpp"
+#include "sceneConfig.hpp"
 #include "callbacks.cuh"
 
 class imGuiUi 
@@ -29,7 +29,7 @@ public:
     void styleDark();
 
 
-    void constSettingsWindow(bool& start, materialGenerator::type& t);
+    void constSettingsWindow(bool& start, sceneConfig& config);
     void settingsWindow(float& ia, bool& animate);
 
     /* check mouse and key input */
@@ -42,6 +42,8 @@ public:
     ImGuiIO& io;
 
 private:
+    bool m_rotateObjects = false;
+
     bool m_inputEscape = false; /* escaped pressed */
     bool m_inputMouseClicked = false; /* mouse clicked */
     bool m_inputMouseLocked = false; /* mouse is locked and used to perform object rotation */

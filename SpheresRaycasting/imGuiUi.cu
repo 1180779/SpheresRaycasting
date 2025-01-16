@@ -53,21 +53,62 @@ void imGuiUi::styleDark()
     ImGui::StyleColorsDark();
 }
 
-void imGuiUi::constSettingsWindow(bool& start, materialGenerator::type& t)
+static void rangeControl(const char* nameMin, const char* nameMax, range& r)
 {
-    //ImGui::SetNextWindowSize(ImVec2(400, 150));
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputFloat(nameMin, &r.min, 10.0f, 100.0f))
+    {
+        if (r.min > r.max)
+            r.min = r.max;
+    }
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputFloat(nameMax, &r.max, 10.0f, 100.0f))
+    {
+        if (r.max < r.min)
+            r.max = r.min;
+    }
+}
+
+static void countControl(const char* name, unsigned int& c) 
+{
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputInt(name, (int*)&c, 1, 10))
+    {
+        if (c < 0)
+            c = 0;
+    }
+}
+void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config)
+{
+    constexpr float spacing = 15.0f;
+    ImGui::SetNextWindowSize(ImVec2(400, 620));
     ImGui::Begin("Constant settings", NULL, ImGuiWindowFlags_NoResize);
     
     ImGui::SetNextItemWidth(150);
     ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
     
+    ImGui::Dummy(ImVec2(0.0f, spacing));
+    countControl("spheres count", config.sCount);
+    rangeControl("spheres x range min", "spheres x range max", config.sXR);
+    rangeControl("spheres y range min", "spheres y range max", config.sYR);
+    rangeControl("spheres z range min", "spheres z range max", config.sZR);
+    rangeControl("spheres radius range min", "spheres radius range max", config.sRR);
+
+    ImGui::Dummy(ImVec2(0.0f, spacing));
+    countControl("lights count", config.lCount);
+    rangeControl("lights x range min", "lights x range max", config.lXR);
+    rangeControl("lights y range min", "lights y range max", config.lYR);
+    rangeControl("lights z range min", "lights z range max", config.lZR);
+    rangeControl("lights radius range min", "lights radius range max", config.lRR);
+
+    ImGui::Dummy(ImVec2(0.0f, spacing));
     static int item = 0;
     if (ImGui::Combo("material type", &item, materialGenerator::typeString, 7))
     {
-        t = static_cast<materialGenerator::type>(item);
+        config.matType = static_cast<materialGenerator::type>(item);
     }
-    
 
+    ImGui::Dummy(ImVec2(0.0f, spacing));
     start = ImGui::Button("Start");
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -76,13 +117,26 @@ void imGuiUi::constSettingsWindow(bool& start, materialGenerator::type& t)
 
 void imGuiUi::settingsWindow(float& ia, bool& animate)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 150));
+    ImGui::SetNextWindowSize(ImVec2(300, 200));
     ImGui::Begin("Dynamic settings", NULL, ImGuiWindowFlags_NoResize);
 
     ImGui::SetNextItemWidth(150);
     ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
 
     ImGui::Checkbox("Animate", &animate);
+
+    ImGui::BeginGroup();
+    ImGui::Text("Rotation mode");
+    if(ImGui::RadioButton("spheres", m_rotateObjects))
+    {
+        m_rotateObjects = true;
+    }
+
+    if(ImGui::RadioButton("lights", !m_rotateObjects))
+    {
+        m_rotateObjects = false;
+    }
+    ImGui::EndGroup();
 
     ImGui::SetNextItemWidth(150);
     if(ImGui::InputFloat("Ia (ambient)", &ia, 0.005f, 0.01f)) 
@@ -130,8 +184,16 @@ void imGuiUi::handleInput()
         {
             /* capture the mouse */
             glfwSetInputMode(m_rendering.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            glfwSetCursorPosCallback(m_rendering.window, mouseCallbackRotateLights);
             m_inputMouseLocked = true;
+            if(m_rotateObjects) 
+            {
+                
+                glfwSetCursorPosCallback(m_rendering.window, mouseCallbackRotateAll);
+            }
+            else 
+            {
+                glfwSetCursorPosCallback(m_rendering.window, mouseCallbackRotateLights);
+            }
         }
     }
 }

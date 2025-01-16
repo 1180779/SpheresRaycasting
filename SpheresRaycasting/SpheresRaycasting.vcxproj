@@ -120,8 +120,10 @@
     <ClInclude Include="mat4.cuh" />
     <ClInclude Include="materialGenerator.hpp" />
     <ClInclude Include="randomValueGenerator.hpp" />
+    <ClInclude Include="range.hpp" />
     <ClInclude Include="rays.cuh" />
     <ClInclude Include="rendering.hpp" />
+    <ClInclude Include="sceneConfig.hpp" />
     <ClInclude Include="timer.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="shaderSource.hpp" />

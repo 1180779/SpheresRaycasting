@@ -152,6 +152,12 @@
     <ClInclude Include="transformScene.hpp">
       <Filter>source\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="sceneConfig.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="range.hpp">
+      <Filter>source\cuda\dataStructures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imGui\imgui.cpp">

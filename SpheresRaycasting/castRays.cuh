@@ -117,7 +117,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
     // move throught the bhv tree
     //auto ptrs = bvh.get_device_repr();
 
-    bvhNodeIdx stack[64]; // local stack
+    bvhNodeIdx stack[32]; // local stack
     int stack_ptr = 0;
     stack[stack_ptr++] = 0;
     while (stack_ptr > 0) {
