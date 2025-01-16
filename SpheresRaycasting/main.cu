@@ -102,7 +102,9 @@ int main(int, char**)
     dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE + 1);
     dim3 threadsLinear = dim3(BLOCK_SIZE);
 
-
+    /* temp data for casting kernels */
+    unifiedObjects objs;
+    objs.dMalloc(b.m_maxWidth * b.m_maxHeight);
 
     /* main render loop */
     /*  ########################################################################## */
@@ -132,8 +134,6 @@ int main(int, char**)
         //render.clearColor();
         //glClear(GL_DEPTH_BUFFER_BIT);
 
-        b.mapCudaResource();
-
         t.start();
         bvh.construct();
         t.stop("construct in loop");
@@ -159,16 +159,24 @@ int main(int, char**)
             // TODO: add animation
         }
 
+        b.mapCudaResource();
+
         /* cast rays */
         t.start();
         data.md_lights.clearColor.x = render.clear_color.x; /* copy background color data */
         data.md_lights.clearColor.y = render.clear_color.y;
         data.md_lights.clearColor.z = render.clear_color.z;
         data.md_lights.clearColor.w = render.clear_color.w;
-        castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
+        findClosestKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, objs, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
-        t.stop("castRaysKernel");
+        t.stop("findClosestKernel");
+
+        t.start();
+        drawColorKernel<<<blocks, threads>>>(objs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
+        xcudaDeviceSynchronize();
+        xcudaGetLastError();
+        t.stop("drawColorKernel");
 
         b.unmapCudaResource();
         b.use();
@@ -176,6 +184,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
+    objs.dFree();
     data.freeLights();
     data.clear();
     return 0;

@@ -41,6 +41,9 @@ void dataObject::generate(
         obj.kd = m.kd;
         obj.alpha = m.alpha;
 
+        assert(obj.alpha > 0.999f);
+        assert(obj.ka >= 0.0f && obj.ka <= 1.0f);
+
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
     }
@@ -70,9 +73,14 @@ void dataObject::generateLights(
         obj.type = types::lightSource;
 
         // not used yet
-        obj.color.x = 255.0f / 2.0f;
-        obj.color.y = 255.0f / 2.0f;
-        obj.color.z = 255.0f / 2.0f;
+        obj.color.x = 1.0f;
+        obj.color.y = 1.0f;
+        obj.color.z = 1.0f;
+
+        obj.ka = 0.5f;
+        obj.kd = 0.5f;
+        obj.ks = 0.5f;
+        obj.alpha = 1.0f;
 
         // save generated data
         mh_lights.x[i] = obj.x;

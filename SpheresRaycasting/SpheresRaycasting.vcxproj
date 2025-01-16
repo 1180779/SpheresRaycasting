@@ -61,7 +61,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>--extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--extended-lambda --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <CudaLink />
@@ -83,7 +83,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>--extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--extended-lambda --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <CudaLink />
