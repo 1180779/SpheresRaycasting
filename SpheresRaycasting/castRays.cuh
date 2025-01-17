@@ -90,7 +90,7 @@ __device__ __forceinline__ float3 max(float3 a, float f)
 
 __global__ void castRaysKernel(const bvhDevice ptrs, 
     int width, int height, 
-    float scaleX, float scaleY, 
+    float scaleX, float scaleY, /* currently not used (1.0f, 1.0f) */
     cudaSurfaceObject_t surfaceObject, lights lights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
