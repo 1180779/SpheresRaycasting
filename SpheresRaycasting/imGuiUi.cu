@@ -188,6 +188,7 @@ void imGuiUi::settingsWindow(float& ia, bool& animate)
     }
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Text("Press ESC to exit to ui");
     ImGui::End();
 }
 
