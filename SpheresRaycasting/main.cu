@@ -84,20 +84,13 @@ int main(int, char**)
 
 
     /* generate data (spheres + lights) */
-    timer t;
-    t.start();
     dataObject data;
     data.generate(config.sCount, config.sRR, config.sXR, config.sYR, config.sZR, config.matType);
     data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR, config.isR, config.idR);
-    t.stop("data.generate");
 
     /* lbvh (Linear Bounding Volume Hierarchy) */
-    t.start();
     lbvh::bvh<float, unifiedObject, aabb_getter> bvh(data.m_objs.begin(), data.m_objs.end());
-    t.stop("first tree generation");
-    t.start();
     const auto ptrs = bvh.get_device_repr();
-    t.stop("device repr");
 
     /* map data for callback functions (rotating objects with mouse) */
     transformData tData, tDataAnimate;
@@ -145,10 +138,7 @@ int main(int, char**)
         //glClear(GL_DEPTH_BUFFER_BIT);
 
         b.mapCudaResource();
-
-        t.start();
         bvh.construct();
-        t.stop("construct in loop");
 
         /* animate (rotate lights over time) */
         if(animation) 
@@ -172,7 +162,6 @@ int main(int, char**)
         }
 
         /* cast rays */
-        t.start();
         data.md_lights.clearColor.x = render.clear_color.x; /* copy background color data */
         data.md_lights.clearColor.y = render.clear_color.y;
         data.md_lights.clearColor.z = render.clear_color.z;
@@ -183,7 +172,6 @@ int main(int, char**)
             b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
-        t.stop("castRaysKernel");
 
         b.unmapCudaResource();
         b.use();
