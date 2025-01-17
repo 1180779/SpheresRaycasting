@@ -204,10 +204,11 @@ __global__ void castRaysKernel(const bvhDevice ptrs,
 
         float3 L = normalize(make_float3(lights.x[i], lights.y[i], lights.z[i]) - C);
         float3 R = normalize(2 * (dot(L, N)) * N - L);
+        float3 lightColor = make_float3(lights.colorX[i], lights.colorY[i], lights.colorZ[i]);
 
         color = color +
-            lights.id[i] * closest.kd * closest.color * fmaxf(0.0f, dot(L, N)) +
-            lights.is[i] * closest.ks * closest.color * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
+            lights.id[i] * closest.kd * closest.color * lightColor * fmaxf(0.0f, dot(L, N)) +
+            lights.is[i] * closest.ks * closest.color * lightColor * __powf(fmaxf(0.0f, dot(R, V)), closest.alpha);
     }
 
     /* clamp value */

@@ -16,19 +16,12 @@ struct lights
     float* is; // specular light intensity ([0, 1])
     float* id; // diffuse light intensity ([0, 1])
 
+    float* colorX;
+    float* colorY;
+    float* colorZ;
+
     float ia = 0.5f;
     float4 clearColor;
-
-    //light operator()(int i) 
-    //{
-    //    light l;
-    //    l.x = x[i];
-    //    l.y = y[i];
-    //    l.z = z[i];
-    //    l.w = w[i];
-    //    l.color = glm::ivec3(l.color);
-    //    return l;
-    //}
 
     void hMalloc(unsigned int count)
     {
@@ -41,6 +34,10 @@ struct lights
 
         is = new float[count];
         id = new float[count];
+
+        colorX = new float[count];
+        colorY = new float[count];
+        colorZ = new float[count];
     }
 
     void hFree()
@@ -52,6 +49,10 @@ struct lights
 
         delete[] is;
         delete[] id;
+
+        delete[] colorX;
+        delete[] colorY;
+        delete[] colorZ;
     }
 
     void dMalloc(unsigned int count)
@@ -64,6 +65,10 @@ struct lights
 
         xcudaMalloc(&is, sizeof(float) * count);
         xcudaMalloc(&id, sizeof(float) * count);
+
+        xcudaMalloc(&colorX, sizeof(float) * count);
+        xcudaMalloc(&colorY, sizeof(float) * count);
+        xcudaMalloc(&colorZ, sizeof(float) * count);
     }
 
     void dFree()
@@ -75,6 +80,10 @@ struct lights
 
         xcudaFree(is);
         xcudaFree(id);
+
+        xcudaFree(colorX);
+        xcudaFree(colorY);
+        xcudaFree(colorZ);
     }
 
     void copyToDeviceFromHost(const lights& other)
@@ -87,6 +96,10 @@ struct lights
 
         xcudaMemcpy(is, other.is, sizeof(float) * count, cudaMemcpyHostToDevice);
         xcudaMemcpy(id, other.id, sizeof(float) * count, cudaMemcpyHostToDevice);
+
+        xcudaMemcpy(colorX, other.colorX, sizeof(float) * count, cudaMemcpyHostToDevice);
+        xcudaMemcpy(colorY, other.colorY, sizeof(float) * count, cudaMemcpyHostToDevice);
+        xcudaMemcpy(colorZ, other.colorZ, sizeof(float) * count, cudaMemcpyHostToDevice);
     }
 };
 

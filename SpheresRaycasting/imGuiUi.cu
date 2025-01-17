@@ -94,7 +94,7 @@ static void countControl(const char* name, unsigned int& c)
     ImGui::SetNextItemWidth(150);
     if (ImGui::InputInt(name, (int*)&c, 1, 10))
     {
-        if (c < 0)
+        if ((int)c < 0)
             c = 0;
     }
 }
