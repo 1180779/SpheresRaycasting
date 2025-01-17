@@ -96,7 +96,6 @@
   <ItemGroup>
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="callbacks.cuh" />
-    <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
     <ClInclude Include="cudaWrappers.hpp" />
     <ClInclude Include="imGuiUi.cuh" />
@@ -132,7 +131,6 @@
     <ClInclude Include="unifiedObject.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <CudaCompile Include="imGuiUi.cu">
       <FileType>Document</FileType>
