@@ -27,7 +27,7 @@ int main(int, char**)
     xcudaSetDevice(0);
 
     /* const settings loop */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
     sceneConfig config;
     config.sCount = 1000;
     config.sXR = range(0, 1920);
@@ -41,6 +41,13 @@ int main(int, char**)
     config.lZR = range(2000, 4000);
     config.lRR = range(20, 20);
 
+    config.isR = range(0.2f, 0.2f);
+    config.idR = range(0.2f, 0.2f);
+
+    config.matType = materialGenerator::type::matte;
+    
+    int camWidth = 1920, camHeight = 1080;
+
     bool start = false;
     while (!glfwWindowShouldClose(render.window) && !start)
     {
@@ -51,7 +58,7 @@ int main(int, char**)
             continue;
         }
         ui.newFrame();
-        ui.constSettingsWindow(start, config);
+        ui.constSettingsWindow(start, config, camWidth, camHeight);
 
         /* rendering */
         ImGui::Render();
@@ -65,27 +72,25 @@ int main(int, char**)
         render.swapBuffers();
     }
 
+    /* if window is closed exit immediately */
+    if (glfwWindowShouldClose(render.window))
+        return 0;
+
     /* preparation (data creation etc.) */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
 
     /* create openGL texture for CUDA */
-    buffer b = buffer();
+    buffer b = buffer(camWidth, camHeight);
+
 
     /* generate data (spheres + lights) */
-    timer t;
-    t.start();
     dataObject data;
     data.generate(config.sCount, config.sRR, config.sXR, config.sYR, config.sZR, config.matType);
-    data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR);
-    t.stop("data.generate");
+    data.generateLights(config.lCount, config.lRR, config.lXR, config.lYR, config.lZR, config.isR, config.idR);
 
     /* lbvh (Linear Bounding Volume Hierarchy) */
-    t.start();
     lbvh::bvh<float, unifiedObject, aabb_getter> bvh(data.m_objs.begin(), data.m_objs.end());
-    t.stop("first tree generation");
-    t.start();
     const auto ptrs = bvh.get_device_repr();
-    t.stop("device repr");
 
     /* map data for callback functions (rotating objects with mouse) */
     transformData tData, tDataAnimate;
@@ -97,17 +102,15 @@ int main(int, char**)
     shiftCallback = glm::vec3(config.sXR.avg(), config.sYR.avg(), config.sZR.avg());
 
     /* CUDA dimentions */
-    dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE + 1, b.m_maxHeight / BLOCK_SIZE + 1);
-    dim3 threads = dim3(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE + 1);
-    dim3 threadsLinear = dim3(BLOCK_SIZE);
+    dim3 blocks = dim3(b.m_maxWidth / BLOCK_SIZE2D + 1, b.m_maxHeight / BLOCK_SIZE2D + 1);
+    dim3 threads = dim3(BLOCK_SIZE2D, BLOCK_SIZE2D);
+    dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE1D + 1);
+    dim3 threadsLinear = dim3(BLOCK_SIZE1D);
 
-    /* temp data for casting kernels */
-    unifiedObjects objs;
-    objs.dMalloc(b.m_maxWidth * b.m_maxHeight);
+    glm::vec2 scale = glm::vec2(1920.0f / b.m_maxWidth, 1080.0f / b.m_maxHeight);
 
     /* main render loop */
-    /*  ########################################################################## */
+    /* ------------------------------------------------------------------------------- */
 
     bool animation = true;
     while (!glfwWindowShouldClose(render.window))
@@ -134,11 +137,10 @@ int main(int, char**)
         //render.clearColor();
         //glClear(GL_DEPTH_BUFFER_BIT);
 
-        t.start();
+        b.mapCudaResource();
         bvh.construct();
-        t.stop("construct in loop");
-        // animate (rotate with time)
 
+        /* animate (rotate lights over time) */
         if(animation) 
         {
             float deltaTime = render.getDeltaTime();
@@ -159,24 +161,20 @@ int main(int, char**)
             // TODO: add animation
         }
 
-        b.mapCudaResource();
-
         /* cast rays */
+        timer t;
         t.start();
         data.md_lights.clearColor.x = render.clear_color.x; /* copy background color data */
         data.md_lights.clearColor.y = render.clear_color.y;
         data.md_lights.clearColor.z = render.clear_color.z;
         data.md_lights.clearColor.w = render.clear_color.w;
-        findClosestKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, objs, data.md_lights);
+        castRaysKernel<<<blocks, threads>>>(ptrs, 
+            b.m_maxWidth, b.m_maxHeight, 
+            1.0f, 1.0f, 
+            b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
-        t.stop("findClosestKernel");
-
-        t.start();
-        drawColorKernel<<<blocks, threads>>>(objs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
-        xcudaDeviceSynchronize();
-        xcudaGetLastError();
-        t.stop("drawColorKernel");
+        t.stop("cast Rays Kernel");
 
         b.unmapCudaResource();
         b.use();
@@ -184,7 +182,6 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         render.swapBuffers();
     }
-    objs.dFree();
     data.freeLights();
     data.clear();
     return 0;

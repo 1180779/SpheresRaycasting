@@ -14,6 +14,7 @@
 #include "imGui/imgui_impl_glfw.h"
 #include "imGui/imgui_impl_opengl3.h"
 
+#include "buffer.hpp"
 #include "sceneConfig.hpp"
 #include "callbacks.cuh"
 
@@ -29,7 +30,7 @@ public:
     void styleDark();
 
 
-    void constSettingsWindow(bool& start, sceneConfig& config);
+    void constSettingsWindow(bool& start, sceneConfig& config, int& camWidth, int& camHeight);
     void settingsWindow(float& ia, bool& animate);
 
     /* check mouse and key input */

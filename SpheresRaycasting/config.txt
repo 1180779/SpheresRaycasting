@@ -1,0 +1,51 @@
+
+# README
+# each line mu be of the following format
+# NAME VALUE
+# that is: 
+# <name of the field> <one or more white characters (' ', '\t')> <field value>
+#
+# parameters:
+# sCount		- numer of spheres
+# sXRmin        - spheres x (coordinate) random range min
+# sXRmax        - spheres x (coordinate) random range max
+# material 	- spheres material (matte, glossy etc. same as in config screen)
+# etc.
+
+# spheres
+sCount 1000
+
+sXRmin 0
+sXRmax 1920
+
+sYRmin 0
+sYRmax 1080
+
+sZRmin 2000
+sZRmax 4000
+
+sRRmin 25
+sRRmax 25
+
+material glossy
+
+# lights
+lCount 10
+
+lXRmin 0
+lXRmax 1920
+
+lYRmin 0
+lYRmax 1080
+
+lZRmin 2000
+lZRmax 4000
+
+lRRmin 25
+lRRmax 25
+
+isRmin 0.5
+isRmax 0.5
+
+idRmin 0.5
+idRmax 0.5

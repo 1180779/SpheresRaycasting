@@ -30,7 +30,8 @@ public:
     void generateLights(
         unsigned int count,
         range rR, range xR,
-        range yR, range zR
+        range yR, range zR,
+        range isR, range idR
     );
 
     void freeLights();

@@ -69,23 +69,45 @@ static void rangeControl(const char* nameMin, const char* nameMax, range& r)
     }
 }
 
+static void rangeControlWithLimits(const char* nameMin, const char* nameMax, range& r, range limits)
+{
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputFloat(nameMin, &r.min, 0.05f, 0.2f))
+    {
+        if (r.min > r.max)
+            r.min = r.max;
+        if (r.min < limits.min)
+            r.min = limits.min;
+    }
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputFloat(nameMax, &r.max, 0.05f, 0.2f))
+    {
+        if (r.max < r.min)
+            r.max = r.min;
+        if (r.max > limits.max)
+            r.max = limits.max;
+    }
+}
+
 static void countControl(const char* name, unsigned int& c) 
 {
     ImGui::SetNextItemWidth(150);
     if (ImGui::InputInt(name, (int*)&c, 1, 10))
     {
-        if (c < 0)
+        if ((int)c < 0)
             c = 0;
     }
 }
-void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config)
+void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config, int& camWidth, int& camHeight)
 {
+    /* start window */
     constexpr float spacing = 15.0f;
+    ImGuiWindowFlags winFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
+    /* sphere settings window */
+    ImGui::SetNextWindowPos(ImVec2(20, 20));
     ImGui::SetNextWindowSize(ImVec2(400, 620));
-    ImGui::Begin("Constant settings", NULL, ImGuiWindowFlags_NoResize);
-    
-    ImGui::SetNextItemWidth(150);
-    ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
+    ImGui::Begin("Sphere settings", NULL, winFlags);
     
     ImGui::Dummy(ImVec2(0.0f, spacing));
     countControl("spheres count", config.sCount);
@@ -95,21 +117,57 @@ void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config)
     rangeControl("spheres radius range min", "spheres radius range max", config.sRR);
 
     ImGui::Dummy(ImVec2(0.0f, spacing));
+    ImGui::Combo("material type", (int*)(&config.matType), 
+        materialGenerator::typeString, materialGenerator::typeCount);
+    ImGui::End();
+
+    /* light settings window */
+    ImGui::SetNextWindowPos(ImVec2(440, 20));
+    ImGui::SetNextWindowSize(ImVec2(400, 620));
+    ImGui::Begin("Light settings", NULL, winFlags);
+    ImGui::Dummy(ImVec2(0.0f, spacing));
     countControl("lights count", config.lCount);
     rangeControl("lights x range min", "lights x range max", config.lXR);
     rangeControl("lights y range min", "lights y range max", config.lYR);
     rangeControl("lights z range min", "lights z range max", config.lZR);
     rangeControl("lights radius range min", "lights radius range max", config.lRR);
 
-    ImGui::Dummy(ImVec2(0.0f, spacing));
-    static int item = 0;
-    if (ImGui::Combo("material type", &item, materialGenerator::typeString, 7))
+    rangeControlWithLimits("light Is min", "light Is max", config.isR, range(0.0f, 1.0f));
+    rangeControlWithLimits("light Id min", "light Id max", config.idR, range(0.0f, 1.0f));
+    ImGui::End();
+
+
+    /* other settings and start window */
+    ImGui::SetNextWindowPos(ImVec2(860, 20));
+    ImGui::SetNextWindowSize(ImVec2(400, 200));
+    ImGui::Begin("Settings", NULL, winFlags);
+    ImGui::SetNextItemWidth(150);
+    ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color);
+
+    ImGui::Text("Camera resolution");
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputInt("camera res x", (int*)&camWidth, 10, 100))
     {
-        config.matType = static_cast<materialGenerator::type>(item);
+        if (camWidth > 1920)
+            camWidth = 1920;
+        if (camWidth < 1280)
+            camWidth = 1280;
+    }
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputInt("camera res y", (int*)&camHeight, 10, 100))
+    {
+        if (camHeight > 1080)
+            camHeight = 1080;
+        if (camHeight < 720)
+            camHeight = 720;
     }
 
     ImGui::Dummy(ImVec2(0.0f, spacing));
     start = ImGui::Button("Start");
+    if(ImGui::Button("Load from file")) 
+    {
+        config.loadFromFile("config.txt");
+    }
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
@@ -121,7 +179,7 @@ void imGuiUi::settingsWindow(float& ia, bool& animate)
     ImGui::Begin("Dynamic settings", NULL, ImGuiWindowFlags_NoResize);
 
     ImGui::SetNextItemWidth(150);
-    ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color); // Edit 3 floats representing a color
+    ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color);
 
     ImGui::Checkbox("Animate", &animate);
 
@@ -148,6 +206,7 @@ void imGuiUi::settingsWindow(float& ia, bool& animate)
     }
 
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Text("Press ESC to exit to ui");
     ImGui::End();
 }
 

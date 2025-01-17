@@ -61,7 +61,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>--extended-lambda --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--extended-lambda %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <CudaLink />
@@ -83,7 +83,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <AdditionalOptions>--extended-lambda --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--extended-lambda %(AdditionalOptions)</AdditionalOptions>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <CudaLink />
@@ -96,7 +96,6 @@
   <ItemGroup>
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="callbacks.cuh" />
-    <ClInclude Include="camera.hpp" />
     <ClInclude Include="castRays.cuh" />
     <ClInclude Include="cudaWrappers.hpp" />
     <ClInclude Include="imGuiUi.cuh" />
@@ -130,10 +129,9 @@
     <ClInclude Include="dataObject.hpp" />
     <ClInclude Include="transformScene.hpp" />
     <ClInclude Include="unifiedObject.hpp" />
-    <ClInclude Include="unifiedObjects.cuh" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="buffer.cpp" />
     <ClCompile Include="glad.c" />
     <CudaCompile Include="imGuiUi.cu">
       <FileType>Document</FileType>
@@ -147,12 +145,14 @@
     <ClCompile Include="imGui\imgui_widgets.cpp" />
     <ClCompile Include="materialGenerator.cpp" />
     <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="sceneConfig.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shaderSource.cpp" />
     <ClCompile Include="dataObject.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="config.txt" />
     <Text Include="imGui\LICENSE.txt" />
     <Text Include="lbvh\LICENSE.txt" />
   </ItemGroup>

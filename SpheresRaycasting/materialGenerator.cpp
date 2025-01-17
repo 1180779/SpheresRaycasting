@@ -3,13 +3,15 @@
 
 const char* const materialGenerator::typeString[] = {
     "matte",
-    "placstic",
+    "plastic",
     "glossy",
     "metallic",
     "reflective",
     "soft",
     "self Luminous"
 };
+
+const int materialGenerator::typeCount = 7;
 
 range materialGenerator::kaRange(type t)
 {

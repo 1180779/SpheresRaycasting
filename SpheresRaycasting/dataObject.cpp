@@ -41,9 +41,6 @@ void dataObject::generate(
         obj.kd = m.kd;
         obj.alpha = m.alpha;
 
-        assert(obj.alpha > 0.999f);
-        assert(obj.ka >= 0.0f && obj.ka <= 1.0f);
-
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
     }
@@ -52,13 +49,17 @@ void dataObject::generate(
 void dataObject::generateLights(
     unsigned int count,
     range rR, range xR,
-    range yR, range zR)
+    range yR, range zR, 
+    range isR, range idR)
 {
     randomValueGenerator rGen(rR);
     randomValueGenerator xGen(xR);
     randomValueGenerator yGen(yR);
     randomValueGenerator zGen(zR);
-    randomValueGenerator colorGen(255.0f / 2.0f);
+
+    randomValueGenerator colorGen(0.0f, 1.0f);
+    randomValueGenerator isGen(isR);
+    randomValueGenerator idGen(idR);
 
     mh_lights.hMalloc(count);
     for (int i = 0; i < count; ++i) {
@@ -73,14 +74,9 @@ void dataObject::generateLights(
         obj.type = types::lightSource;
 
         // not used yet
-        obj.color.x = 1.0f;
-        obj.color.y = 1.0f;
-        obj.color.z = 1.0f;
-
-        obj.ka = 0.5f;
-        obj.kd = 0.5f;
-        obj.ks = 0.5f;
-        obj.alpha = 1.0f;
+        obj.color.x = colorGen();
+        obj.color.y = colorGen();
+        obj.color.z = colorGen();
 
         // save generated data
         mh_lights.x[i] = obj.x;
@@ -88,8 +84,12 @@ void dataObject::generateLights(
         mh_lights.z[i] = obj.z;
         mh_lights.w[i] = obj.w;
 
-        mh_lights.is[i] = 0.2f;
-        mh_lights.id[i] = 0.2f;
+        mh_lights.is[i] = isGen();
+        mh_lights.id[i] = idGen();
+
+        mh_lights.colorX[i] = obj.color.x;
+        mh_lights.colorY[i] = obj.color.y;
+        mh_lights.colorZ[i] = obj.color.z;
 
         m_objs.push_back(obj);
         //std::cout << "x = " << obj.x << ", y = " << obj.y << ", z = " << obj.z << ", r = " << obj.r << std::endl;
