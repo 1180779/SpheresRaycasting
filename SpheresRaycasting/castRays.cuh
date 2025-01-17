@@ -111,11 +111,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs,
     D.z = 1.0f;
 
     /* find closes sphere(or light) by z coordinate */ 
-    unifiedObject closest;
-    closest.x = FLT_MAX / 2.f;
-    closest.y = FLT_MAX / 2.f;
-    closest.z = FLT_MAX / 2.f;
-    closest.r = 1.f;
+    int closestIdx = -1;
 
     /* move throught the bhv tree */ 
     /* note: shared memory stack appears to be slower */
@@ -132,19 +128,23 @@ __global__ void castRaysKernel(const bvhDevice ptrs,
         if (current.left_idx == 0xFFFFFFFF) /* is leaf */
         {
             int i = current.object_idx;
-
+            if(closestIdx == -1) 
+            {
+                closestIdx = i;
+                continue;
+            }
             /* check if hit is closer */
             
             /* check which spehre is closer by z coordinate of its center 
                 * assumes that spheres are of the same radius and are not overlapping */
-            if (!(ptrs.objects[i].z < closest.z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
+            if (!(ptrs.objects[i].z < ptrs.objects[closestIdx].z)) // (!(data.sData.z[i] - o.z < closest.z - o.z))
                 continue;
 
             //check x and y
             float dist2 = (ptrs.objects[i].x - O.x) * (ptrs.objects[i].x - O.x) + (ptrs.objects[i].y - O.y) * (ptrs.objects[i].y - O.y);
             if (dist2 > ptrs.objects[i].r * ptrs.objects[i].r)
                 continue;
-            closest = ptrs.objects[i];
+            closestIdx = i;
         }
         else 
         {
@@ -157,7 +157,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs,
     __syncthreads();
 
     /* if found no sphere, write background color to texture */
-    if (closest.x == FLT_MAX / 2.f)
+    if (closestIdx == -1)
     {
         uchar4 notFoundWriteData;
         notFoundWriteData.x = (unsigned char)(lights.clearColor.x * 255.0f);
@@ -168,6 +168,7 @@ __global__ void castRaysKernel(const bvhDevice ptrs,
         return;
     }
 
+    unifiedObject closest = ptrs.objects[closestIdx];
     if (closest.type == types::lightSource) 
     {
         uchar4 writeData;

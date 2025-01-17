@@ -162,6 +162,8 @@ int main(int, char**)
         }
 
         /* cast rays */
+        timer t;
+        t.start();
         data.md_lights.clearColor.x = render.clear_color.x; /* copy background color data */
         data.md_lights.clearColor.y = render.clear_color.y;
         data.md_lights.clearColor.z = render.clear_color.z;
@@ -172,6 +174,7 @@ int main(int, char**)
             b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
+        t.stop("cast Rays Kernel");
 
         b.unmapCudaResource();
         b.use();
