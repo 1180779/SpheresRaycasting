@@ -131,6 +131,7 @@
     <ClInclude Include="unifiedObject.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="buffer.cpp" />
     <ClCompile Include="glad.c" />
     <CudaCompile Include="imGuiUi.cu">
       <FileType>Document</FileType>

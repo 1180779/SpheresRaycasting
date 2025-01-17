@@ -98,7 +98,7 @@ static void countControl(const char* name, unsigned int& c)
             c = 0;
     }
 }
-void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config)
+void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config, int& camWidth, int& camHeight)
 {
     /* start window */
     constexpr float spacing = 15.0f;
@@ -139,10 +139,28 @@ void imGuiUi::constSettingsWindow(bool& start, sceneConfig& config)
 
     /* other settings and start window */
     ImGui::SetNextWindowPos(ImVec2(860, 20));
-    ImGui::SetNextWindowSize(ImVec2(400, 150));
+    ImGui::SetNextWindowSize(ImVec2(400, 200));
     ImGui::Begin("Settings", NULL, winFlags);
     ImGui::SetNextItemWidth(150);
     ImGui::ColorEdit3("Change background", (float*)&m_rendering.clear_color);
+
+    ImGui::Text("Camera resolution");
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputInt("camera res x", (int*)&camWidth, 10, 100))
+    {
+        if (camWidth > 1920)
+            camWidth = 1920;
+        if (camWidth < 1280)
+            camWidth = 1280;
+    }
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::InputInt("camera res y", (int*)&camHeight, 10, 100))
+    {
+        if (camHeight > 1080)
+            camHeight = 1080;
+        if (camHeight < 720)
+            camHeight = 720;
+    }
 
     ImGui::Dummy(ImVec2(0.0f, spacing));
     start = ImGui::Button("Start");

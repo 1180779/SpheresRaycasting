@@ -45,6 +45,8 @@ int main(int, char**)
     config.idR = range(0.2f, 0.2f);
 
     config.matType = materialGenerator::type::matte;
+    
+    int camWidth = 1920, camHeight = 1080;
 
     bool start = false;
     while (!glfwWindowShouldClose(render.window) && !start)
@@ -56,7 +58,7 @@ int main(int, char**)
             continue;
         }
         ui.newFrame();
-        ui.constSettingsWindow(start, config);
+        ui.constSettingsWindow(start, config, camWidth, camHeight);
 
         /* rendering */
         ImGui::Render();
@@ -78,7 +80,7 @@ int main(int, char**)
     /* ------------------------------------------------------------------------------- */
 
     /* create openGL texture for CUDA */
-    buffer b = buffer();
+    buffer b = buffer(camWidth, camHeight);
 
 
     /* generate data (spheres + lights) */
@@ -112,7 +114,7 @@ int main(int, char**)
     dim3 blocksLinear = dim3(data.m_objs.size() / BLOCK_SIZE1D + 1);
     dim3 threadsLinear = dim3(BLOCK_SIZE1D);
 
-
+    glm::vec2 scale = glm::vec2(1920.0f / b.m_maxWidth, 1080.0f / b.m_maxHeight);
 
     /* main render loop */
     /* ------------------------------------------------------------------------------- */
@@ -175,7 +177,10 @@ int main(int, char**)
         data.md_lights.clearColor.y = render.clear_color.y;
         data.md_lights.clearColor.z = render.clear_color.z;
         data.md_lights.clearColor.w = render.clear_color.w;
-        castRaysKernel<<<blocks, threads>>>(ptrs, b.m_maxWidth, b.m_maxHeight, b.m_surfaceObject, data.md_lights);
+        castRaysKernel<<<blocks, threads>>>(ptrs, 
+            b.m_maxWidth, b.m_maxHeight, 
+            1.0f, 1.0f, 
+            b.m_surfaceObject, data.md_lights);
         xcudaDeviceSynchronize();
         xcudaGetLastError();
         t.stop("castRaysKernel");

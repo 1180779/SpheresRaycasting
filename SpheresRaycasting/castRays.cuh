@@ -88,7 +88,10 @@ __device__ __forceinline__ float3 max(float3 a, float f)
 /* kernel to cast rays */
 /* ------------------------------------------------------------------------------- */
 
-__global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cudaSurfaceObject_t surfaceObject, lights lights)
+__global__ void castRaysKernel(const bvhDevice ptrs, 
+    int width, int height, 
+    float scaleX, float scaleY, 
+    cudaSurfaceObject_t surfaceObject, lights lights)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x; // pixel x
     int y = blockIdx.y * blockDim.y + threadIdx.y; // pixel y
@@ -98,8 +101,8 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
 
     // ray origin
     float3 O;
-    O.x = x;
-    O.y = y;
+    O.x = x * scaleX;
+    O.y = y * scaleY;
     O.z = 0;
 
     float3 D;
@@ -165,7 +168,8 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
         return;
     }
 
-    if (closest.type == types::lightSource) {
+    if (closest.type == types::lightSource) 
+    {
         uchar4 writeData;
         writeData.x = (unsigned char)(closest.color.x * 255.0f);
         writeData.y = (unsigned char)(closest.color.y * 255.0f);
@@ -194,7 +198,8 @@ __global__ void castRaysKernel(const bvhDevice ptrs, int width, int height, cuda
 
     /* Phong light model */
     float3 color = lights.ia * closest.ka * closest.color;
-    for (int i = 0; i < lights.count; ++i) {
+    for (int i = 0; i < lights.count; ++i) 
+    {
         __syncthreads();
 
         float3 L = normalize(make_float3(lights.x[i], lights.y[i], lights.z[i]) - C);
