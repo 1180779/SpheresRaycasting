@@ -80,9 +80,6 @@
     <ClInclude Include="shader.hpp">
       <Filter>source\rendering\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="camera.hpp">
-      <Filter>source\cuda\camera</Filter>
-    </ClInclude>
     <ClInclude Include="rendering.hpp">
       <Filter>source\rendering</Filter>
     </ClInclude>
@@ -184,9 +181,6 @@
     <ClCompile Include="shader.cpp">
       <Filter>source\rendering\shaders</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
-      <Filter>source\cuda\camera</Filter>
-    </ClCompile>
     <ClCompile Include="rendering.cpp">
       <Filter>source\rendering</Filter>
     </ClCompile>
@@ -205,6 +199,8 @@
     <ClCompile Include="materialGenerator.cpp">
       <Filter>source\cuda\dataStructures</Filter>
     </ClCompile>
+    <ClCompile Include="buffer.cpp" />
+    <ClCompile Include="sceneConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="lbvh\LICENSE.txt">
@@ -213,5 +209,6 @@
     <Text Include="imGui\LICENSE.txt">
       <Filter>dependencies\imgui</Filter>
     </Text>
+    <Text Include="config.txt" />
   </ItemGroup>
 </Project>
